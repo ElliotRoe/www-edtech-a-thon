@@ -2,7 +2,7 @@
   import heroImage from './assets/edtech-athon-hero.png'
 
   // Replace this with the real form URL when it is ready.
-  const formLink = '#'
+  const formLink = 'https://docs.google.com/forms/d/e/1FAIpQLSe-DIYBCiD3ewgji0ugGrR4xvOaNIexTWa3AWrKb0KPS3dFiw/viewform?usp=publish-editor'
 
   const organizers = [
     {
@@ -65,6 +65,7 @@
       <div class="flex justify-center">
         <a
           href={formLink}
+          target="_blank"
           class="inline-flex items-center justify-center rounded-full bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-200"
         >
           Open the form
@@ -118,6 +119,7 @@
 
         <a
           href={formLink}
+          target="_blank"
           class="inline-flex items-center justify-center rounded-full bg-amber-300 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-amber-200"
         >
           Open the form

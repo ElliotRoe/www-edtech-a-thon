@@ -1,0 +1,366 @@
+---
+import '../styles/global.css'
+
+const formLink =
+  'https://docs.google.com/forms/d/e/1FAIpQLSe0axLrX6rW9X-Og9-UCs_NVkcq1M66opaFRXuF8yu3M3JRBw/viewform?usp=dialog'
+
+const shareProblemLink = formLink
+const interestLink = 'https://docs.google.com/forms/d/e/1FAIpQLSd8RWjEIUrWAgU-1rRgm-jL_pjlYZa1tNAjSIAppVDRVSWT0w/viewform?usp=publish-editor'
+
+type ProblemModule = {
+  frontmatter: {
+    category: string
+    order?: number
+    solutionLink?: string
+    solutionName?: string
+    title: string
+  }
+}
+
+const problemModules = import.meta.glob<ProblemModule>('../problems/*.md', { eager: true })
+const visibleProblemCount = 3
+
+const problemCards = Object.entries(problemModules)
+  .map(([path, module]) => ({
+    category: module.frontmatter.category,
+    order: module.frontmatter.order ?? Number.MAX_SAFE_INTEGER,
+    slug: path.split('/').pop()?.replace('.md', '') ?? '',
+    solutionLink: module.frontmatter.solutionLink,
+    solutionName: module.frontmatter.solutionName,
+    title: module.frontmatter.title,
+  }))
+  .sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug))
+
+const carouselProblemCards = [
+  ...problemCards,
+  ...problemCards.slice(0, Math.min(visibleProblemCount, problemCards.length)),
+]
+
+const faqs = [
+  {
+    question: 'Do I need to come for all three days?',
+    answer:
+      "No. You are welcome to participate for as many days or hours as you'd like. Want to stop by for an hour? Totally fine! Want to stay for 10 hours every day? Great!",
+  },
+  {
+    question: 'Is there an option to participate virtually?',
+    answer:
+      "We think it'll be more fun to be there in-person, but remote participation is possible.",
+  },
+  {
+    question: 'Is there a cost to attend?',
+    answer: 'No. The EdTech-a-thon is completely free to attend.',
+  },
+  {
+    question: 'How many attendees are expected?',
+    answer:
+      "We're not sure yet, but we can guarantee that there will be at least three people in attendance.",
+  },
+  {
+    question: 'What does the event structure look like?',
+    answer: 'TBD',
+  },
+  {
+    question: 'Do I need to bring a team?',
+    answer: 'Nope!',
+  },
+]
+
+const organizers = [
+  {
+    name: 'Josh Pullen',
+    headshot: '/Josh.png',
+    siteLabel: 'joshuapullen.com',
+    siteHref: 'https://www.joshuapullen.com/',
+    blurb:
+      "An Algebra teacher and web developer from South Lyon, Michigan, Josh Pullen builds practical EdTech solutions for his classroom and shares them with other teachers. He has developed interactive math lessons for 3Blue1Brown and is the creator of Shuffle Buddy, a specialized seating chart generator. Josh's work provides simple, effective tools that solve the day-to-day challenges educators actually face.",
+  },
+  {
+    name: 'Duncan Johnson',
+    headshot: '/Duncan.png',
+    siteLabel: 'duncanajohnson.com',
+    siteHref: 'https://www.duncanajohnson.com/',
+    blurb:
+      'An EdTech researcher and designer from Boston, Massachusetts, Duncan Johnson builds educational technology for universities and companies alike. He previously co-founded a STEM education non-profit with Elliot Roe and has published computer science education research with the Tufts University Center for Engineering Education and Outreach.',
+  },
+  {
+    name: 'Elliot Roe',
+    headshot: '/Elliot.png',
+    siteLabel: 'elliotbroe.com',
+    siteHref: 'https://elliotbroe.com/',
+    blurb:
+      'A full-time software engineer from Atlanta, Georgia, Elliot Roe is passionate about open-source software and educational technology. He previously co-founded a STEM education non-profit with Duncan Johnson and worked as a research assistant at the Play and Learn Lab, where he developed educational games and supported after-school programs. Now, Elliot develops open-source tooling for researchers, integrating academic literature with AI.',
+  },
+  {
+    name: 'Jess',
+    headshot: '/Jess.png',
+    blurb: 'Organizer bio coming soon.',
+  },
+  {
+    name: 'Sam',
+    headshot: '/Sam.png',
+    blurb: 'Organizer bio coming soon.',
+  },
+]
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fffdf8" />
+    <meta
+      name="description"
+      content="Real teachers and developers solving practical classroom problems together at EdTech-a-thon, July 20-22, 2026 in Atlanta, GA."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>EdTech-a-thon</title>
+  </head>
+  <body class="text-slate-950">
+    <main class="page-shell mx-auto flex w-full max-w-5xl flex-col gap-20 p-[80px] py-6">
+      <header class="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
+        <a href="/" class="flex items-center gap-3">
+          <img src="/favicon.svg" alt="" class="h-12 w-12" />
+          <span class="font-display text-4xl text-slate-950">EdTech-a-thon</span>
+        </a>
+        <p class="text-sm font-semibold text-slate-600">July 20 - 22, 2026 &bull; Atlanta, GA</p>
+      </header>
+
+      <section class="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-center">
+        <div class="flex flex-col gap-5">
+          <h1 class="text-xl text-slate-600 uppercase">
+            Real teachers. Real problems. Real solutions.
+          </h1>
+          <p class="text-4xl font-semibold text-slate-900">
+            Bringing educators and developers together for a 3-day problem-solving marathon
+          </p>
+          <p class="text-lg leading-8 text-slate-700">
+            Educators and developers live in different worlds. We're bringing them together from July 20-22 virtually and in-person in Atlanta, GA for three days of collaboration, community, and problem solving.
+          </p>
+        </div>
+        <div class="polaroid-stack" aria-label="Educators and developers collaborating">
+          <figure class="polaroid polaroid-back" aria-hidden="true">
+            <img src="/hero-3.png" alt="" />
+          </figure>
+          <figure class="polaroid polaroid-middle" aria-hidden="true">
+            <img src="/hero-2.png" alt="" />
+          </figure>
+          <figure class="polaroid polaroid-front">
+            <img src="/hero-1.png" alt="Educators and developers collaborating" />
+          </figure>
+        </div>
+      </section>
+
+      <section aria-labelledby="problem-board">
+        <div class="border border-slate-400 border-b-4 bg-white rounded-lg">
+          <div class="p-6">
+            <div class="flex flex-row justify-between">
+              <div>
+                <h2 class="text-3xl font-extrabold text-slate-950">Are you an educator?</h2>
+                <p class="mt-1 text-lg leading-8 text-slate-700">We want to solve your problem.</p>
+              </div>
+              <div class="flex flex-col items-start gap-3">
+                <a
+                  href={shareProblemLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  class="w-full rounded-full inline-flex items-center justify-center bg-primary-200 px-5 py-3 text-sm font-bold text-primary-900 transition hover:bg-primary-100"
+                >
+                  Share Your Problem
+                </a>
+              </div>
+            </div>
+          </div>
+          <p class="text-slate-600 text-sm border-t w-full border-dashed border-slate-400 bg-slate-100 rounded-b-md p-2">
+            If you know a busy educator and want to share a problem on their behalf, still fill out the form!
+          </p>
+        </div>
+        <div>
+          <div class="mt-6 overflow-hidden" aria-live="off" data-problem-carousel>
+            <div class="problem-carousel-track flex" data-problem-track data-problem-count={problemCards.length}>
+              {carouselProblemCards.map((problem) => (
+                <article
+                  class={`problem-carousel-card min-h-64 flex-none border bg-white p-5 shadow-sm rounded-lg ${
+                    problem.solutionLink ? 'border-primary-400 border-b-4' : 'border-slate-200'
+                  }`}
+                >
+                  <div class="flex items-center justify-between gap-3">
+                    {problem.solutionLink ? (
+                      <span class="inline-flex items-center gap-1 rounded-full bg-primary-100 px-2 py-1 text-xs font-bold text-primary-900">
+                        <span aria-hidden="true">&#10003;</span>
+                        Solved
+                      </span>
+                    ) : (
+                      <span class="inline-flex items-center rounded-full border border-slate-200 bg-slate-100 px-2 py-1 text-xs font-bold text-slate-600">
+                        Unsolved
+                      </span>
+                    )}
+
+                    {problem.solutionLink && (
+                      <a
+                        href={problem.solutionLink}
+                        target="_blank"
+                        rel="noreferrer"
+                        aria-label={`Open ${problem.solutionName ?? 'solution'} website`}
+                        class="inline-flex h-8 w-8 items-center justify-center rounded-full border border-primary-200 text-primary-800 transition hover:bg-primary-100"
+                      >
+                        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M7 17 17 7" />
+                          <path d="M7 7h10v10" />
+                        </svg>
+                      </a>
+                    )}
+                  </div>
+
+                  <h3 class="mt-8 text-xl font-extrabold leading-tight text-slate-950">{problem.title}</h3>
+                  {problem.solutionLink && (
+                    <a
+                      href={problem.solutionLink}
+                      target="_blank"
+                      rel="noreferrer"
+                      class="mt-6 inline-flex text-sm font-bold text-primary-700 transition hover:text-primary-900"
+                    >
+                      Solution: {problem.solutionName ?? 'View solution'}
+                    </a>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <p class="mt-6 text-base leading-7 text-slate-700">
+            Our success is measured collaboratively by the number of problems solved for teachers, recognizing that every problem solved is a win for all educators.
+          </p>
+        </div>
+      </section>
+
+      <section class="border-t border-slate-200 pt-10" aria-labelledby="why-come-heading">
+        <h2 id="why-come-heading" class="font-display text-4xl text-slate-950">Why come?</h2>
+        <div class="mt-6 grid border border-slate-400 bg-white lg:grid-cols-2 rounded-lg border-b-4">
+          <article class="border-b border-slate-400 border-dashed p-6 lg:border-b-0 lg:border-r">
+            <h3 class="text-sm font-extrabold uppercase text-slate-950">
+              For educators, we solve real struggles
+            </h3>
+            <div class="mt-5 space-y-5 text-base leading-7 text-slate-700">
+              <p>
+                Every day, educators are being sold on the next big thing. Somebody else, far away from the classroom, knows what's best for your students and is doing their darndest to sell you on it.
+              </p>
+              <p>
+                We don't believe in that. At the EdTech-a-thon, we gather real problems from the folks who are actually in the classroom. We spend three days building solutions, steered by teacher feedback the entire time. At the end, we share all our solutions for use in the classroom.
+              </p>
+            </div>
+          </article>
+
+          <article class="p-6">
+            <h3 class="text-sm font-extrabold uppercase text-slate-950">
+              For developers, unmatched feedback
+            </h3>
+            <p class="mt-5 text-base leading-7 text-slate-700">
+              Building EdTech is fun, but educators are notoriously difficult to reach. At the EdTech-a-thon, developers have the opportunity to test their solutions with real educators all day long.
+            </p>
+            <p class="mt-5 text-base leading-7 text-slate-700">
+              The best solutions are built with tight feedback loops and users who will tell if their needs are met. You'll find this and more for three straight days of development and testing with real users.
+            </p>
+          </article>
+          <p class="text-slate-600 text-sm border-t w-full border-dashed border-slate-400 bg-slate-100 rounded-b-md p-2 col-span-2">
+            Sound like fun? <a href={interestLink} target="_blank" rel="noreferrer">Register your interest <span class="underline font-bold">here</span></a>
+          </p>
+        </div>
+      </section>
+
+      <section class="border-t border-slate-200 pt-10" aria-labelledby="faq-heading">
+        <h2 id="faq-heading" class="font-display text-4xl text-slate-950">FAQ</h2>
+        <div class="mt-6 divide-y divide-slate-200 border-y border-slate-200">
+          {faqs.map((faq) => (
+            <details class="group py-5">
+              <summary class="flex cursor-pointer list-none items-center justify-between gap-6 text-left text-base font-bold text-slate-950">
+                <span>{faq.question}</span>
+                <span class="text-2xl font-normal leading-none text-slate-400 transition group-open:rotate-45">+</span>
+              </summary>
+              <p class="mt-3 max-w-3xl text-base leading-7 text-slate-700">{faq.answer}</p>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      <section class="border-t border-slate-200 pt-10" aria-labelledby="organizers-heading">
+        <h2 id="organizers-heading" class="font-display text-4xl text-slate-950">Organized By</h2>
+
+        <div class="mt-8 divide-y divide-slate-200 border-y border-slate-200">
+          {organizers.map((organizer) => (
+            <article class="grid gap-5 py-6 sm:grid-cols-[96px_1fr]">
+              <img
+                src={organizer.headshot}
+                alt={`${organizer.name} headshot`}
+                class="h-[150px] rounded-lg border border-dashed border-slate-400 object-cover"
+              />
+              <div>
+                <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+                  <h3 class="text-2xl font-extrabold text-slate-950">{organizer.name}</h3>
+                  {organizer.siteHref && (
+                    <a
+                      href={organizer.siteHref}
+                      target="_blank"
+                      rel="noreferrer"
+                      class="text-xs font-bold uppercase text-slate-500 transition hover:text-slate-950"
+                    >
+                      {organizer.siteLabel}
+                    </a>
+                  )}
+                </div>
+                <p class="mt-3 text-base leading-7 text-slate-700">{organizer.blurb}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <footer class="py-8 text-center text-sm text-slate-500">
+        Made with ❤️ for teachers, by a team who believes educators will <span class="underline">continue</span> to be the future of learning
+       </footer>
+    </main>
+    <script>
+      const track = document.querySelector('[data-problem-track]')
+      const cards = Array.from(track?.children ?? [])
+      const originalCardCount = Number(track?.dataset.problemCount ?? '0')
+      let currentProblem = 0
+      let isResetting = false
+
+      function getCardStep() {
+        if (cards.length < 2) return 0
+
+        const firstCard = cards[0].getBoundingClientRect()
+        const secondCard = cards[1].getBoundingClientRect()
+        return secondCard.left - firstCard.left
+      }
+
+      function moveToProblem(index, shouldAnimate = true) {
+        if (!track || cards.length === 0) return
+
+        currentProblem = index
+        track.style.transition = shouldAnimate ? 'transform 1000ms ease-in-out' : 'none'
+        track.style.transform = `translate3d(${-currentProblem * getCardStep()}px, 0, 0)`
+      }
+
+      function advanceProblems() {
+        if (!track || isResetting) return
+
+        moveToProblem(currentProblem + 1)
+      }
+
+      track?.addEventListener('transitionend', () => {
+        if (currentProblem !== originalCardCount) return
+
+        isResetting = true
+        moveToProblem(0, false)
+        track?.getBoundingClientRect()
+        isResetting = false
+      })
+
+      moveToProblem(0, false)
+      window.addEventListener('resize', () => moveToProblem(currentProblem, false))
+      window.setInterval(advanceProblems, 4500)
+    </script>
+  </body>
+</html>

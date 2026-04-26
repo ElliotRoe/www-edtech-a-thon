@@ -73,12 +73,26 @@ img {
   background: linear-gradient(
     90deg,
     rgb(254 253 246 / 0) 0,
-    rgb(254 253 246 / 0.92) 2rem,
-    #fefdf6 4rem,
-    #fefdf6 calc(100% - 4rem),
-    rgb(254 253 246 / 0.92) calc(100% - 2rem),
+    rgb(254 253 246 / 0.92) 0.5rem,
+    #fefdf6 1rem,
+    #fefdf6 calc(100% - 1rem),
+    rgb(254 253 246 / 0.92) calc(100% - 0.5rem),
     rgb(254 253 246 / 0) 100%
   );
+}
+
+@media (min-width: 1024px) {
+  .page-shell {
+    background: linear-gradient(
+      90deg,
+      rgb(254 253 246 / 0) 0,
+      rgb(254 253 246 / 0.92) 2rem,
+      #fefdf6 4rem,
+      #fefdf6 calc(100% - 4rem),
+      rgb(254 253 246 / 0.92) calc(100% - 2rem),
+      rgb(254 253 246 / 0) 100%
+    );
+  }
 }
 
 .polaroid-stack {
@@ -134,5 +148,17 @@ img {
 }
 
 .problem-carousel-card {
-  width: calc((100% - 2rem) / 3);
+  width: calc(100% - 1rem);
+}
+
+@media (min-width: 640px) {
+  .problem-carousel-card {
+    width: calc((100% - 1rem) / 2);
+  }
+}
+
+@media (min-width: 1024px) {
+  .problem-carousel-card {
+    width: calc((100% - 2rem) / 3);
+  }
 }

@@ -118,7 +118,7 @@ const organizers = [
     <title>EdTech-a-thon</title>
   </head>
   <body class="text-slate-950">
-    <main class="page-shell mx-auto flex w-full max-w-5xl flex-col gap-20 p-[80px] py-6">
+    <main class="page-shell mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-6 sm:gap-16 sm:px-8 md:gap-20 lg:px-[80px]">
       <header class="flex flex-col gap-5 border-b border-slate-200 pb-6 sm:flex-row sm:items-center sm:justify-between">
         <a href="/" class="flex items-center gap-3">
           <img src="/favicon.svg" alt="" class="h-12 w-12" />
@@ -155,17 +155,17 @@ const organizers = [
       <section aria-labelledby="problem-board">
         <div class="border border-slate-400 border-b-4 bg-white rounded-lg">
           <div class="p-6">
-            <div class="flex flex-row justify-between">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <h2 class="text-3xl font-extrabold text-slate-950">Are you an educator?</h2>
+                <h2 class="text-2xl font-extrabold text-slate-950 sm:text-3xl">Are you an educator?</h2>
                 <p class="mt-1 text-lg leading-8 text-slate-700">We want to solve your problem.</p>
               </div>
-              <div class="flex flex-col items-start gap-3">
+              <div class="flex flex-col items-start gap-3 sm:flex-shrink-0">
                 <a
                   href={shareProblemLink}
                   target="_blank"
                   rel="noreferrer"
-                  class="w-full rounded-full inline-flex items-center justify-center bg-primary-200 px-5 py-3 text-sm font-bold text-primary-900 transition hover:bg-primary-100"
+                  class="w-full rounded-full inline-flex items-center justify-center bg-primary-200 px-5 py-3 text-sm font-bold text-primary-900 transition hover:bg-primary-100 sm:w-auto"
                 >
                   Share Your Problem
                 </a>
@@ -263,7 +263,7 @@ const organizers = [
               The best solutions are built with tight feedback loops and users who will tell if their needs are met. You'll find this and more for three straight days of development and testing with real users.
             </p>
           </article>
-          <p class="text-slate-600 text-sm border-t w-full border-dashed border-slate-400 bg-slate-100 rounded-b-md p-2 col-span-2">
+          <p class="text-slate-600 text-sm border-t w-full border-dashed border-slate-400 bg-slate-100 rounded-b-md p-2 col-span-1 lg:col-span-2">
             Sound like fun? <a href={interestLink} target="_blank" rel="noreferrer">Register your interest <span class="underline font-bold">here</span></a>
           </p>
         </div>

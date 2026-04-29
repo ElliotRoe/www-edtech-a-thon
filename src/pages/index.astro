@@ -352,7 +352,7 @@ const organizers = [
       }
 
       track?.addEventListener('transitionend', () => {
-        if (currentProblem !== originalCardCount) return
+        if (currentProblem < originalCardCount) return
 
         isResetting = true
         moveToProblem(0, false)

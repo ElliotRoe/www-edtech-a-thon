@@ -1,0 +1,22 @@
+---
+const formLink =
+  'https://docs.google.com/forms/d/e/1FAIpQLSe0axLrX6rW9X-Og9-UCs_NVkcq1M66opaFRXuF8yu3M3JRBw/viewform?usp=dialog'
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex" />
+    <meta http-equiv="refresh" content={`0; url=${formLink}`} />
+    <title>Redirecting to the EdTech-a-thon form</title>
+    <script is:inline define:vars={{ formLink }}>
+      window.location.replace(formLink)
+    </script>
+  </head>
+  <body>
+    <p>
+      Redirecting to the EdTech-a-thon form. <a href={formLink}>Open the form</a>.
+    </p>
+  </body>
+</html>

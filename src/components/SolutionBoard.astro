@@ -1,0 +1,34 @@
+---
+import type { BoardSolution } from "../lib/board";
+import { potentialSolutionAnchor } from "../lib/board";
+import ProblemLinkList from "./ProblemLinkList.astro";
+
+interface Props {
+  solutions: BoardSolution[];
+  emptyText: string;
+}
+
+const { solutions, emptyText } = Astro.props;
+---
+
+{
+  solutions.length === 0 ? (
+    <p class="py-8 text-center italic text-slate-500">{emptyText}</p>
+  ) : (
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {solutions.map((solution) => (
+        <div
+          id={potentialSolutionAnchor(solution.pageId)}
+          class="flex scroll-mt-24 flex-col gap-3 rounded-lg border border-b-4 border-slate-400 bg-white p-4 target:ring-2 target:ring-amber-400"
+        >
+          <h2 class="text-lg font-semibold leading-snug text-slate-900">
+            {solution.name}
+          </h2>
+          {solution.problems.length > 0 && (
+            <ProblemLinkList problems={solution.problems} label="Solves:" />
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}

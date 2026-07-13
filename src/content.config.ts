@@ -3,11 +3,18 @@ import { z } from "astro/zod";
 import {
   GROUP_PROPS,
   notionLoader,
+  POTENTIAL_SOLUTION_PROPS,
   PROBLEM_PROPS,
+  readCheckbox,
+  readDate,
   readRelationIds,
   readRichText,
+  readRollupRelationIds,
+  readSelect,
   readTitle,
   readUniqueId,
+  readUrl,
+  SOLUTION_PROPS,
 } from "./lib/notion";
 
 /**
@@ -71,4 +78,112 @@ const groups = defineCollection({
   }),
 });
 
-export const collections = { problems, groups };
+/**
+ * A lightweight index of ALL problems (published or not), carrying only
+ * non-PII fields (title, PR id, publishable flag) — never the raw problem /
+ * solution text. Used purely to resolve links from the solution boards back to
+ * the Problem Database: a covered problem links to its detail page only when it
+ * is `publishable` (i.e. that page exists); otherwise its title still shows.
+ */
+const problemsIndex = defineCollection({
+  loader: notionLoader({
+    name: "problem index entries",
+    databaseIdEnv: "NOTION_PROBLEMS_DB_ID",
+    map: (page) => {
+      const props = page.properties;
+      return {
+        id: page.id,
+        pageId: page.id,
+        prId: readUniqueId(props, PROBLEM_PROPS.id),
+        title: readTitle(props, PROBLEM_PROPS.title),
+        publishable: readCheckbox(props, PROBLEM_PROPS.publishable),
+      };
+    },
+  }),
+  schema: z.object({
+    pageId: z.string(),
+    prId: z.string(),
+    title: z.string(),
+    publishable: z.boolean(),
+  }),
+});
+
+/**
+ * Potential Solutions. Only rows accepted onto a board are loaded ("Yes" →
+ * Problem Board, "Extra Credit" → Extra Credit page). We publish the solution
+ * name and its covered-problem links ONLY — never Notes, educators, or scores.
+ */
+const potentialSolutions = defineCollection({
+  loader: notionLoader({
+    name: "potential solutions",
+    databaseIdEnv: "NOTION_POTENTIAL_SOLUTIONS_DB_ID",
+    filter: {
+      or: [
+        { property: POTENTIAL_SOLUTION_PROPS.accepted, select: { equals: "Yes" } },
+        {
+          property: POTENTIAL_SOLUTION_PROPS.accepted,
+          select: { equals: "Extra Credit" },
+        },
+      ],
+    },
+    map: (page) => {
+      const props = page.properties;
+      const name = readTitle(props, POTENTIAL_SOLUTION_PROPS.title);
+      if (!name) return null;
+      return {
+        id: page.id,
+        pageId: page.id,
+        name,
+        accepted: readSelect(props, POTENTIAL_SOLUTION_PROPS.accepted),
+        problemIds: readRollupRelationIds(
+          props,
+          POTENTIAL_SOLUTION_PROPS.problemsCovered,
+        ),
+      };
+    },
+  }),
+  schema: z.object({
+    pageId: z.string(),
+    name: z.string(),
+    accepted: z.string(),
+    problemIds: z.array(z.string()),
+  }),
+});
+
+/** Completed, shipped solutions for the gallery. */
+const solutions = defineCollection({
+  loader: notionLoader({
+    name: "completed solutions",
+    databaseIdEnv: "NOTION_SOLUTIONS_DB_ID",
+    map: (page) => {
+      const props = page.properties;
+      const name = readTitle(props, SOLUTION_PROPS.title);
+      if (!name) return null;
+      return {
+        id: page.id,
+        pageId: page.id,
+        name,
+        url: readUrl(props, SOLUTION_PROPS.link),
+        builtBy: readRichText(props, SOLUTION_PROPS.builtBy),
+        date: readDate(props, SOLUTION_PROPS.date),
+        problemIds: readRelationIds(props, SOLUTION_PROPS.problems),
+      };
+    },
+  }),
+  schema: z.object({
+    pageId: z.string(),
+    name: z.string(),
+    url: z.string(),
+    builtBy: z.string(),
+    date: z.string(),
+    problemIds: z.array(z.string()),
+  }),
+});
+
+export const collections = {
+  problems,
+  groups,
+  problemsIndex,
+  potentialSolutions,
+  solutions,
+};

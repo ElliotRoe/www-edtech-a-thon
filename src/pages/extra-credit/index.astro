@@ -1,0 +1,24 @@
+---
+import Layout from "../../components/Layout.astro";
+import BoardNav from "../../components/BoardNav.astro";
+import SolutionBoard from "../../components/SolutionBoard.astro";
+import { getBoardSolutions } from "../../lib/board";
+
+const solutions = await getBoardSolutions("Extra Credit");
+---
+
+<Layout title="Extra Credit">
+  <section>
+    <BoardNav current="extra-credit" />
+    <h1 class="mt-6 text-3xl font-bold text-slate-900">Extra Credit</h1>
+    <p class="mt-2 text-slate-600">
+      {solutions.length} stretch solutions to tackle if there's time.
+    </p>
+    <div class="mt-6">
+      <SolutionBoard
+        solutions={solutions}
+        emptyText="No extra credit solutions yet."
+      />
+    </div>
+  </section>
+</Layout>

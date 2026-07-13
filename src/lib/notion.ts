@@ -37,6 +37,21 @@ export const GROUP_PROPS = {
   problems: "Problems", // relation → Problems database
 } as const;
 
+export const POTENTIAL_SOLUTION_PROPS = {
+  title: "Name",
+  accepted: "Accepted", // select: "Yes" → Problem Board, "Extra Credit" → Extra Credit
+  // Rollup (via Relevant Educators) surfacing the Problems-DB pages this solution covers.
+  problemsCovered: "Problems Covered",
+} as const;
+
+export const SOLUTION_PROPS = {
+  title: "Name",
+  link: "Link", // url of the built/live solution
+  builtBy: "Built By", // rich text — builder credit
+  problems: "Problems", // relation → Problems database
+  date: "Date",
+} as const;
+
 type Props = PageObjectResponse["properties"];
 
 function getToken(): string {
@@ -102,6 +117,44 @@ export function readCheckbox(props: Props, name: string): boolean {
 export function readRelationIds(props: Props, name: string): string[] {
   const prop = props[name];
   return prop?.type === "relation" ? prop.relation.map((r) => r.id) : [];
+}
+
+export function readSelect(props: Props, name: string): string {
+  const prop = props[name];
+  if (prop?.type === "select") return prop.select?.name ?? "";
+  if (prop?.type === "status") return prop.status?.name ?? "";
+  return "";
+}
+
+export function readUrl(props: Props, name: string): string {
+  const prop = props[name];
+  return prop?.type === "url" ? (prop.url ?? "") : "";
+}
+
+/** ISO date string (start) or "". */
+export function readDate(props: Props, name: string): string {
+  const prop = props[name];
+  return prop?.type === "date" ? (prop.date?.start ?? "") : "";
+}
+
+/**
+ * Collect related page ids from either a plain relation or a rollup that
+ * aggregates a relation (Notion "show original"). Potential Solutions expose
+ * their covered problems as such a rollup.
+ */
+export function readRollupRelationIds(props: Props, name: string): string[] {
+  const prop = props[name];
+  if (prop?.type === "relation") return prop.relation.map((r) => r.id);
+  if (prop?.type === "rollup" && prop.rollup.type === "array") {
+    const ids: string[] = [];
+    for (const item of prop.rollup.array as Array<{ type: string } & Record<string, unknown>>) {
+      if (item.type === "relation") {
+        for (const r of item.relation as Array<{ id: string }>) ids.push(r.id);
+      }
+    }
+    return [...new Set(ids)];
+  }
+  return [];
 }
 
 /** Read a unique-id column (e.g. `PR-123`). Falls back to rich text / title. */

@@ -1,10 +1,13 @@
 <script lang="ts">
-  import ProblemBoardCard from "./ProblemBoardCard.svelte";
+  import ProblemBoardCard, {
+    type ProblemStatus,
+  } from "./ProblemBoardCard.svelte";
 
   interface Problem {
     slug: string;
     prId: string;
     title: string;
+    status: ProblemStatus;
   }
   interface Section {
     title: string;
@@ -51,13 +54,27 @@
     aria-label="Search groups and problems"
     class="w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder:text-slate-400 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-300"
   />
-  <p class="mt-2 text-sm text-slate-500">
-    {#if query.trim()}
-      {shownCount} of {total} problems match
-    {:else}
-      {total} problems across {sections.length} groups
-    {/if}
-  </p>
+  <div class="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+    <span>
+      {#if query.trim()}
+        {shownCount} of {total} problems match
+      {:else}
+        {total} problems across {sections.length} groups
+      {/if}
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="inline-block h-3 w-3 rounded-sm border border-sky-300 bg-sky-100"></span>
+      Problem Board
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="inline-block h-3 w-3 rounded-sm border border-amber-300 bg-amber-100"></span>
+      Extra Credit
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="inline-block h-3 w-3 rounded-sm border border-green-300 bg-green-100"></span>
+      Completed
+    </span>
+  </div>
 </div>
 
 <div class="mt-4 flex flex-col gap-8">
@@ -77,6 +94,7 @@
             slug={problem.slug}
             prId={problem.prId}
             title={problem.title}
+            status={problem.status}
           />
         {/each}
       </div>

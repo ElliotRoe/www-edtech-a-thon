@@ -1,0 +1,33 @@
+---
+interface Props {
+  current: "database" | "board" | "extra-credit" | "completed";
+}
+
+const { current } = Astro.props;
+
+const links = [
+  { key: "database", href: "/problem-database", label: "Problem Database" },
+  { key: "board", href: "/problem-board", label: "Problem Board" },
+  { key: "extra-credit", href: "/extra-credit", label: "Extra Credit" },
+  { key: "completed", href: "/completed-solutions", label: "Completed Solutions" },
+] as const;
+---
+
+<nav class="flex flex-wrap gap-2 text-sm">
+  {
+    links.map((link) =>
+      link.key === current ? (
+        <span class="rounded-full bg-slate-900 px-3 py-1 font-semibold text-white">
+          {link.label}
+        </span>
+      ) : (
+        <a
+          href={link.href}
+          class="rounded-full border border-slate-300 px-3 py-1 text-slate-600 transition hover:border-slate-500 hover:text-slate-900"
+        >
+          {link.label}
+        </a>
+      ),
+    )
+  }
+</nav>

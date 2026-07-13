@@ -1,0 +1,136 @@
+---
+import Layout from "../../components/Layout.astro";
+import ProgressBar from "../../components/ProgressBar.astro";
+import ProjectCard from "../../components/ProjectCard.astro";
+import SolutionModal from "../../components/SolutionModal.svelte";
+import {
+  getBoardSolutions,
+  getBoardProgress,
+  getGalleryForBoard,
+  boardCardAction,
+  potentialSolutionAnchor,
+} from "../../lib/board";
+
+const [projects, extraCredit, progress, gallery] = await Promise.all([
+  getBoardSolutions("Yes"),
+  getBoardSolutions("Extra Credit"),
+  getBoardProgress(),
+  getGalleryForBoard(),
+]);
+// Resolve a completed project to the gallery key that opens its modal.
+const { items: galleryItems, keyFor } = gallery;
+
+// Compact-list status label + dot colour for the Extra Credit rows.
+const EC_STATUS: Record<string, { label: string; dot: string }> = {
+  Completed: { label: "Completed", dot: "bg-primary-400" },
+  "In-Progress": { label: "In progress", dot: "bg-amber-300" },
+  "Not Started": { label: "Not started", dot: "bg-slate-300" },
+};
+const ecStatus = (p: string) =>
+  EC_STATUS[p] ?? { label: "Not started", dot: "bg-slate-300" };
+---
+
+<Layout title="Project Board">
+  <section class="flex flex-col gap-8">
+    <div>
+      <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+        Project Board
+      </h1>
+      <p class="mt-2 text-slate-600">
+        The solutions our teams are building at EdTech-a-thon. Jump into a
+        project's forum thread to follow along or contribute.
+      </p>
+    </div>
+
+    <ProgressBar progress={progress} />
+
+    {
+      projects.length === 0 ? (
+        <p class="py-8 text-center italic text-slate-500">
+          No accepted projects yet — check back soon.
+        </p>
+      ) : (
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {projects.map((solution) => (
+            <ProjectCard solution={solution} galleryKey={keyFor(solution)} />
+          ))}
+        </div>
+      )
+    }
+
+    {
+      extraCredit.length > 0 && (
+        <div class="border-t border-dashed border-slate-300 pt-6">
+          <div class="flex items-baseline gap-2">
+            <h2 class="text-xl font-bold text-slate-900">Extra Credit</h2>
+            <span class="text-sm text-slate-500">
+              stretch goals if there's time
+            </span>
+          </div>
+          <ul class="mt-3 flex flex-col divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-300 bg-white">
+            {extraCredit.map((s) => {
+              const st = ecStatus(s.progress);
+              // Completed with a gallery entry → open modal; otherwise link to
+              // the solution (completed) or forum thread (to contribute).
+              const modalKey = keyFor(s);
+              const href = modalKey ? "" : boardCardAction(s)?.href ?? "";
+              const Row = modalKey ? "button" : href ? "a" : "div";
+              const rowProps = modalKey
+                ? { type: "button", "data-solution-open": modalKey }
+                : href
+                  ? { href, target: "_blank", rel: "noopener noreferrer" }
+                  : {};
+              return (
+                <li id={potentialSolutionAnchor(s.pageId)} class="scroll-mt-24 target:bg-amber-50">
+                  <Row
+                    {...rowProps}
+                    class={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm ${modalKey || href ? "transition hover:bg-slate-50" : ""}`}
+                  >
+                    <span
+                      class={`h-2.5 w-2.5 shrink-0 rounded-full ${st.dot}`}
+                      title={st.label}
+                    />
+                    <span class="font-semibold text-slate-800">{s.name}</span>
+                    {s.oneLiner && (
+                      <span class="hidden truncate text-slate-500 sm:inline">
+                        &mdash; {s.oneLiner}
+                      </span>
+                    )}
+                    <span class="ml-auto shrink-0 text-xs font-medium text-slate-400">
+                      {st.label}
+                    </span>
+                  </Row>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      )
+    }
+
+    <div class="border-t border-slate-200 pt-6">
+      <a
+        href="/problem-database"
+        class="text-sm font-medium text-slate-500 transition hover:text-slate-900"
+      >
+        Browse all submitted classroom problems &rarr;
+      </a>
+    </div>
+
+    {galleryItems.length > 0 && <SolutionModal client:load items={galleryItems} />}
+  </section>
+</Layout>
+
+<script>
+  // Completed project cards / extra-credit rows carry `data-solution-open` with
+  // a gallery key; forward clicks to the SolutionModal island via a window event.
+  document.addEventListener("click", (e) => {
+    const el = (e.target as HTMLElement).closest("[data-solution-open]");
+    if (!el) return;
+    const key = el.getAttribute("data-solution-open");
+    if (key) {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent("open-solution", { detail: key }));
+    }
+  });
+</script>

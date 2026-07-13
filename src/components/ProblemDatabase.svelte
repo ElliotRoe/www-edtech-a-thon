@@ -64,7 +64,7 @@
     </span>
     <span class="flex items-center gap-1.5">
       <span class="inline-block h-3 w-3 rounded-sm border border-sky-300 bg-sky-100"></span>
-      Problem Board
+      Project Board
     </span>
     <span class="flex items-center gap-1.5">
       <span class="inline-block h-3 w-3 rounded-sm border border-amber-300 bg-amber-100"></span>

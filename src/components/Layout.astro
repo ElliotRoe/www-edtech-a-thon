@@ -6,6 +6,16 @@ interface Props {
 }
 
 const { title } = Astro.props;
+
+const navLinks = [
+  { href: "/project-board", label: "Project Board" },
+  { href: "/solution-gallery", label: "Solution Gallery" },
+  { href: "/schedule", label: "Virtual Event" },
+] as const;
+
+// Active when the current path is (or is nested under) the link's path.
+const path = Astro.url.pathname.replace(/\/$/, "");
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 
 <!doctype html>
@@ -41,9 +51,29 @@ const { title } = Astro.props;
           <span class="font-display text-4xl text-slate-950">EdTech-a-thon</span
           >
         </a>
-        <p class="text-sm font-semibold text-slate-600">
-          July 20 - 22, 2026 &bull; Atlanta, GA
-        </p>
+        <div class="flex flex-col gap-3 sm:items-end">
+          <nav class="flex flex-wrap gap-2 text-sm font-semibold">
+            {
+              navLinks.map((link) =>
+                isActive(link.href) ? (
+                  <span class="rounded-full bg-primary-400 px-3 py-1.5 text-primary-950 shadow-[0_2px_0_var(--color-primary-700)]">
+                    {link.label}
+                  </span>
+                ) : (
+                  <a
+                    href={link.href}
+                    class="rounded-full border border-slate-300 px-3 py-1.5 text-slate-700 transition hover:border-primary-400 hover:bg-primary-50 hover:text-primary-900"
+                  >
+                    {link.label}
+                  </a>
+                ),
+              )
+            }
+          </nav>
+          <p class="text-sm font-semibold text-slate-600">
+            July 20 - 22, 2026 &bull; Atlanta, GA
+          </p>
+        </div>
       </header>
 
       <slot />

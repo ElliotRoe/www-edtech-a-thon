@@ -1,6 +1,5 @@
 ---
 import Layout from "../../components/Layout.astro";
-import BoardNav from "../../components/BoardNav.astro";
 import ProblemDatabase from "../../components/ProblemDatabase.svelte";
 import { getCollection } from "astro:content";
 import { getSolversByProblem } from "../../lib/board";
@@ -54,8 +53,10 @@ const total = sections.reduce((n, s) => n + s.problems.length, 0);
 
 <Layout title="Problem Database">
   <section>
-    <BoardNav current="database" />
-    <h1 class="mt-6 text-3xl font-bold text-slate-900">Problem Database</h1>
+    <a href="/project-board" class="text-sm text-slate-500 hover:underline"
+      >&larr; Project Board</a
+    >
+    <h1 class="mt-4 text-3xl font-bold text-slate-900">Problem Database</h1>
     <ProblemDatabase client:load sections={sections} total={total} />
   </section>
 </Layout>

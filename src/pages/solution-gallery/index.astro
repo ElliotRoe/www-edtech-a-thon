@@ -1,0 +1,23 @@
+---
+import Layout from "../../components/Layout.astro";
+import SolutionGallery from "../../components/SolutionGallery.svelte";
+import { getSolutionGallery } from "../../lib/board";
+
+const items = await getSolutionGallery();
+---
+
+<Layout title="Solution Gallery">
+  <section>
+    <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">
+      Solution Gallery
+    </h1>
+    <p class="mt-2 text-slate-600">
+      {items.length} solutions built for teachers at EdTech-a-thon. Tap a card to
+      watch the showcase and share feedback.
+    </p>
+
+    <div class="mt-8">
+      <SolutionGallery client:load items={items} />
+    </div>
+  </section>
+</Layout>

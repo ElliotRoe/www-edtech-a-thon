@@ -1,0 +1,56 @@
+---
+import { getCollection } from "astro:content";
+import Layout from "../../../components/Layout.astro";
+import Submission from "../../../components/Submission.astro";
+import SubmissionPart from "../../../components/SubmissionPart.astro";
+
+export async function getStaticPaths() {
+  const problems = await getCollection("problems");
+  return problems.map((problem) => ({
+    params: { slug: problem.id }, // entry id is the lowercased PR id, e.g. "pr-123"
+    props: { problem },
+  }));
+}
+
+const { problem } = Astro.props;
+const { prId, title, problem: problemText, solution } = problem.data;
+
+// Split redacted text into paragraphs on blank lines; single newlines are kept
+// via `whitespace-pre-line` on the container.
+const toParagraphs = (text: string) =>
+  text
+    .split(/\n{2,}/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+---
+
+<Layout title={[title, "Problem"]}>
+  <section>
+    <a href="/problem-database" class="hover:underline">&larr; Problem Database</a>
+    <div class="mt-4 text-sm text-slate-500">{prId}</div>
+    <h1 class="text-4xl font-bold text-slate-900 mt-1">{title}</h1>
+
+    <div class="mt-8">
+      <Submission>
+        <SubmissionPart type="problem">
+          {
+            problemText
+              ? toParagraphs(problemText).map((p) => (
+                  <p class="whitespace-pre-line">{p}</p>
+                ))
+              : <p class="italic text-slate-500">No description provided.</p>
+          }
+        </SubmissionPart>
+        {
+          solution && (
+            <SubmissionPart type="proposed-solution">
+              {toParagraphs(solution).map((p) => (
+                <p class="whitespace-pre-line">{p}</p>
+              ))}
+            </SubmissionPart>
+          )
+        }
+      </Submission>
+    </div>
+  </section>
+</Layout>

@@ -17,6 +17,7 @@
   "dependencies": {
     "@astrojs/markdoc": "^1.0.4",
     "@astrojs/svelte": "^8.1.0",
+    "@notionhq/client": "^5.23.0",
     "@tailwindcss/vite": "^4.3.0",
     "svelte": "^5.55.5",
     "tailwindcss": "^4.3.0",

@@ -1,154 +1,33 @@
 <script lang="ts">
-  import type { TagString } from "../content.config";
-  import ProblemTag from "./ProblemTag.svelte";
+  export type ProblemStatus = "completed" | "board" | "extra-credit" | null;
 
   interface Props {
-    id: string;
     slug: string;
+    prId: string;
     title: string;
-    status?: "open" | "complete";
-    tags?: TagString[];
-    solutions?: {
-      teamName: string;
-      teamSize: number;
-      status: "in-progress" | "complete";
-    }[];
+    status?: ProblemStatus;
   }
 
-  const {
-    id,
-    slug,
-    title,
-    status = "open",
-    tags = [],
-    solutions = [],
-  }: Props = $props();
+  const { slug, prId, title, status = null }: Props = $props();
 
-  const workIsDone = $derived(
-    status === "complete" &&
-      solutions.every((solution) => solution.status === "complete"),
-  );
+  // Tint by where the problem can be found. Full literal class strings so
+  // Tailwind's scanner keeps them.
+  const styles: Record<NonNullable<ProblemStatus>, string> = {
+    completed: "border-green-300 bg-green-100",
+    board: "border-sky-300 bg-sky-100",
+    "extra-credit": "border-amber-300 bg-amber-100",
+  };
+  const tint = status ? styles[status] : "border-slate-400 bg-white";
 </script>
 
 <a
-  href={`/problems/${slug}`}
-  class={[
-    "flex flex-col border border-b-4 rounded-lg hover:-translate-y-1 hover:shadow-lg transition",
-    {
-      "border-slate-400 bg-white": status === "open",
-      "border-primary-500 bg-primary-50": status === "complete",
-    },
-  ]}
+  href={`/problem-database/${slug}`}
+  class={`flex flex-col border border-b-4 rounded-lg hover:-translate-y-1 hover:shadow-lg transition ${tint}`}
 >
   <div class="flex flex-col p-4 grow justify-center">
-    <div class="flex items-start mb-2">
-      <span
-        class={[
-          "block text-sm",
-          {
-            "text-slate-600": status === "open",
-            "text-primary-700": status === "complete",
-            "mt-0.5": tags.length > 0,
-          },
-        ]}
-      >
-        #{id}
-      </span>
-      {#if tags.length > 0}
-        <div class="ml-auto justify-end flex flex-wrap gap-1">
-          {#each tags as tag}
-            <ProblemTag {tag} showText={false} />
-          {/each}
-        </div>
-      {/if}
-    </div>
+    <span class="block text-sm text-slate-600 mb-2">{prId}</span>
     <div class="grow flex flex-col justify-center">
-      <div
-        class={[
-          "text-lg leading-snug",
-          {
-            "text-slate-700": status === "open",
-            "text-primary-800": status === "complete",
-          },
-        ]}
-      >
-        {title}
-      </div>
-    </div>
-  </div>
-  <div
-    class={[
-      "border-t border-dashed rounded-b-md p-2",
-      {
-        "text-slate-600 border-slate-400 bg-slate-100": status === "open",
-        "text-primary-700 border-primary-500 bg-primary-100":
-          status === "complete",
-      },
-    ]}
-  >
-    <div>
-      <div class="text-xs font-semibold">
-        {workIsDone ? "Worked" : "Working"} on this...
-      </div>
-      {#if solutions.length > 0}
-        <div class="flex flex-col gap-1 mt-1">
-          {#each solutions as solution}
-            <div
-              class={[
-                "flex items-center border rounded-full gap-1 py-1 px-3 text-sm",
-                {
-                  "border-dashed border-slate-300":
-                    solution.status === "in-progress" && status === "open",
-                  "border-dashed border-slate-300 bg-slate-50":
-                    solution.status === "in-progress" && status === "complete",
-                  "border-solid border-primary-500 bg-primary-100 text-primary-700":
-                    solution.status === "complete" && status === "open",
-                  "border-solid border-primary-500 bg-primary-200 text-primary-700":
-                    solution.status === "complete" && status === "complete",
-                },
-              ]}
-            >
-              {#if solution.teamSize === 1}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  class="size-4"
-                >
-                  <path
-                    d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z"
-                  />
-                </svg>
-              {:else if solution.teamSize === 2}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  class="size-4"
-                >
-                  <path
-                    d="M8.5 4.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0ZM10.9 12.006c.11.542-.348.994-.9.994H2c-.553 0-1.01-.452-.902-.994a5.002 5.002 0 0 1 9.803 0ZM14.002 12h-1.59a2.556 2.556 0 0 0-.04-.29 6.476 6.476 0 0 0-1.167-2.603 3.002 3.002 0 0 1 3.633 1.911c.18.522-.283.982-.836.982ZM12 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"
-                  />
-                </svg>
-              {:else}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 16 16"
-                  fill="currentColor"
-                  class="size-4"
-                >
-                  <path
-                    d="M8 8a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5ZM3.156 11.763c.16-.629.44-1.21.813-1.72a2.5 2.5 0 0 0-2.725 1.377c-.136.287.102.58.418.58h1.449c.01-.077.025-.156.045-.237ZM12.847 11.763c.02.08.036.16.046.237h1.446c.316 0 .554-.293.417-.579a2.5 2.5 0 0 0-2.722-1.378c.374.51.653 1.09.813 1.72ZM14 7.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0ZM3.5 9a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM5 13c-.552 0-1.013-.455-.876-.99a4.002 4.002 0 0 1 7.753 0c.136.535-.324.99-.877.99H5Z"
-                  />
-                </svg>
-              {/if}
-              <span>{solution.teamName}</span>
-            </div>
-          {/each}
-        </div>
-      {:else}
-        <span class="text-sm italic">Nobody working yet</span>
-      {/if}
+      <div class="text-lg leading-snug text-slate-700">{title}</div>
     </div>
   </div>
 </a>

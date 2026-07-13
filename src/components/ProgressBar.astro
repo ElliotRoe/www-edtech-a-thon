@@ -1,0 +1,76 @@
+---
+import type { BoardProgress } from "../lib/board";
+
+interface Props {
+  progress: BoardProgress;
+}
+
+const { progress } = Astro.props;
+const { total, completed, inProgress, extraCompleted } = progress;
+
+// Percentages of the bar. Guard against divide-by-zero on an empty board.
+const pct = (n: number) => (total > 0 ? (n / total) * 100 : 0);
+const completedPct = pct(completed);
+const inProgressPct = pct(inProgress);
+const done = completed + inProgress;
+---
+
+<div class="rounded-xl border border-b-4 border-slate-400 bg-white p-5 sm:p-6">
+  <div class="flex flex-wrap items-end justify-between gap-3">
+    <div>
+      <div class="flex items-baseline gap-2">
+        <span class="text-4xl font-extrabold tabular-nums text-slate-900"
+          >{completed}</span
+        >
+        <span class="text-lg font-semibold text-slate-500">/ {total} projects completed</span>
+      </div>
+      <p class="mt-1 text-sm text-slate-500">
+        {completed} completed &bull; {inProgress} in progress &bull; {
+          total - done
+        } not started
+      </p>
+    </div>
+    {
+      extraCompleted > 0 && (
+        <span class="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-100 px-3 py-1 text-sm font-bold text-amber-900">
+          +{extraCompleted} extra credit project completed
+        </span>
+      )
+    }
+  </div>
+
+  <div
+    class="mt-4 flex h-5 w-full overflow-hidden rounded-full bg-slate-200 shadow-inner"
+    role="progressbar"
+    aria-valuenow={done}
+    aria-valuemin="0"
+    aria-valuemax={total}
+    aria-label={`${done} of ${total} projects in progress or shipped`}
+  >
+    <div
+      class="h-full bg-primary-400 transition-all"
+      style={`width: ${completedPct}%`}
+    >
+    </div>
+    <div
+      class="h-full bg-amber-300 transition-all"
+      style={`width: ${inProgressPct}%`}
+    >
+    </div>
+  </div>
+
+  <div class="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs font-medium text-slate-500">
+    <span class="flex items-center gap-1.5">
+      <span class="inline-block h-3 w-3 rounded-sm bg-primary-400"></span>
+      Completed
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="inline-block h-3 w-3 rounded-sm bg-amber-300"></span>
+      In progress
+    </span>
+    <span class="flex items-center gap-1.5">
+      <span class="inline-block h-3 w-3 rounded-sm bg-slate-200"></span>
+      Not started
+    </span>
+  </div>
+</div>

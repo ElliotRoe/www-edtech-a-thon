@@ -1,0 +1,62 @@
+---
+import Layout from "../../components/Layout.astro";
+import ProblemDatabase from "../../components/ProblemDatabase.svelte";
+import { getCollection } from "astro:content";
+import { getSolversByProblem } from "../../lib/board";
+import type { ProblemStatus } from "../../components/ProblemBoardCard.svelte";
+
+const [groups, problems, solvers] = await Promise.all([
+  getCollection("groups"),
+  getCollection("problems"),
+  getSolversByProblem(),
+]);
+
+// Map Notion page id -> Publishable problem entry (unpublishable never load).
+const byPageId = new Map(problems.map((p) => [p.data.pageId, p]));
+
+// Tint each problem by where it can be found. Priority: a shipped solution
+// (green) outranks being planned on the board (blue), which outranks extra
+// credit (yellow); unaddressed problems stay neutral.
+function statusFor(pageId: string): ProblemStatus {
+  const s = solvers.get(pageId);
+  if (!s) return null;
+  if (s.completed.length > 0) return "completed";
+  if (s.potential.some((p) => p.accepted === "Yes")) return "board";
+  if (s.potential.some((p) => p.accepted === "Extra Credit")) return "extra-credit";
+  return null;
+}
+
+// Resolve each group's relation to its publishable problems, drop empty groups,
+// and order sections alphabetically by group name.
+const sections = groups
+  .map((group) => ({
+    title: group.data.title,
+    problems: group.data.problemIds
+      .map((id) => byPageId.get(id))
+      .filter((p) => p !== undefined)
+      .map((p) => ({
+        slug: p.id,
+        prId: p.data.prId,
+        title: p.data.title,
+        status: statusFor(p.data.pageId),
+      })),
+  }))
+  .filter((section) => section.problems.length > 0)
+  // Largest groups first; break ties alphabetically for a stable order.
+  .sort(
+    (a, b) =>
+      b.problems.length - a.problems.length || a.title.localeCompare(b.title),
+  );
+
+const total = sections.reduce((n, s) => n + s.problems.length, 0);
+---
+
+<Layout title="Problem Database">
+  <section>
+    <a href="/project-board" class="text-sm text-slate-500 hover:underline"
+      >&larr; Project Board</a
+    >
+    <h1 class="mt-4 text-3xl font-bold text-slate-900">Problem Database</h1>
+    <ProblemDatabase client:load sections={sections} total={total} />
+  </section>
+</Layout>

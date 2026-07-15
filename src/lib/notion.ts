@@ -40,12 +40,14 @@ export const GROUP_PROPS = {
 export const POTENTIAL_SOLUTION_PROPS = {
   title: "Name",
   accepted: "Accepted", // select: "Yes" → Problem Board, "Extra Credit" → Extra Credit
+  projectSlug: "Project Slug", // rich text — DNS-safe name created by the admin script
   // Rollup (via Relevant Educators) surfacing the Problems-DB pages this solution covers.
   problemsCovered: "Problems Covered",
   oneLiner: "One-Liner", // rich text — short one-sentence description shown on the card
   contributors: "Contributors", // rich text — contributor names (may be empty)
   progress: "Progress", // select: "Not Started" | "In-Progress" | "Completed"
   forumLink: "Forum Link", // url — forum post for the in-progress project
+  githubLink: "Github Link", // url — GitHub repository for the project
   solutionLink: "Solution Link", // url — link to the finished solution
 } as const;
 

@@ -8,8 +8,9 @@ export interface ProblemLink {
   href: string | null;
 }
 
-/** Which board a potential solution lives on. Core projects and Extra Credit
- *  now share the Project Board page (Extra Credit is a section within it). */
+/** Which board a potential solution lives on. Core projects, the Collaborative
+ *  Build Cohort ("Vibe Code") and Extra Credit all share the Project Board page,
+ *  each as a section within it. */
 export function boardHrefForAccepted(_accepted: string): string {
   return "/project-board";
 }
@@ -56,8 +57,8 @@ export interface BoardSolution {
   problems: ProblemLink[];
 }
 
-/** Potential solutions for one board (`accepted` = "Yes" | "Extra Credit"),
- *  each with its covered problems resolved, sorted by name. */
+/** Potential solutions for one board (`accepted` = "Yes" | "Vibe Code" |
+ *  "Extra Credit"), each with its covered problems resolved, sorted by name. */
 export async function getBoardSolutions(
   accepted: string,
 ): Promise<BoardSolution[]> {

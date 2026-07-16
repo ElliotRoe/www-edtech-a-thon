@@ -110,8 +110,10 @@ const problemsIndex = defineCollection({
 
 /**
  * Potential Solutions. Only rows accepted onto a board are loaded ("Yes" →
- * Problem Board, "Extra Credit" → Extra Credit page). We publish the solution
- * name and its covered-problem links ONLY — never Notes, educators, or scores.
+ * Project Board, "Vibe Code" → Collaborative Build Cohort, "Extra Credit" →
+ * Extra Credit); all three are sections of the Project Board page. We publish
+ * the solution name and its covered-problem links ONLY — never Notes,
+ * educators, or scores.
  */
 const potentialSolutions = defineCollection({
   loader: notionLoader({
@@ -120,6 +122,10 @@ const potentialSolutions = defineCollection({
     filter: {
       or: [
         { property: POTENTIAL_SOLUTION_PROPS.accepted, select: { equals: "Yes" } },
+        {
+          property: POTENTIAL_SOLUTION_PROPS.accepted,
+          select: { equals: "Vibe Code" },
+        },
         {
           property: POTENTIAL_SOLUTION_PROPS.accepted,
           select: { equals: "Extra Credit" },

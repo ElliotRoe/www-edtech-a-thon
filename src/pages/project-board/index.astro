@@ -11,8 +11,9 @@ import {
   potentialSolutionAnchor,
 } from "../../lib/board";
 
-const [projects, extraCredit, progress, gallery] = await Promise.all([
+const [projects, vibeCode, extraCredit, progress, gallery] = await Promise.all([
   getBoardSolutions("Yes"),
+  getBoardSolutions("Vibe Code"),
   getBoardSolutions("Extra Credit"),
   getBoardProgress(),
   getGalleryForBoard(),
@@ -59,6 +60,30 @@ const ecStatus = (p: string) =>
     }
 
     {
+      vibeCode.length > 0 && (
+        <div class="border-t border-dashed border-slate-300 pt-6">
+          <div class="flex flex-wrap items-baseline gap-x-2">
+            <h2 class="text-xl font-bold text-slate-900">
+              Collaborative Build Cohort
+            </h2>
+            <span class="text-sm text-slate-500">
+              educators building apps directly, with developers supporting
+            </span>
+          </div>
+          <div class="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+            {vibeCode.map((solution) => (
+              <ProjectCard
+                solution={solution}
+                galleryKey={keyFor(solution)}
+                compact
+              />
+            ))}
+          </div>
+        </div>
+      )
+    }
+
+    {
       extraCredit.length > 0 && (
         <div class="border-t border-dashed border-slate-300 pt-6">
           <div class="flex items-baseline gap-2">
@@ -90,9 +115,11 @@ const ecStatus = (p: string) =>
                       class={`h-2.5 w-2.5 shrink-0 rounded-full ${st.dot}`}
                       title={st.label}
                     />
-                    <span class="font-semibold text-slate-800">{s.name}</span>
+                    <span class="shrink-0 font-semibold text-slate-800">
+                      {s.name}
+                    </span>
                     {s.oneLiner && (
-                      <span class="hidden truncate text-slate-500 sm:inline">
+                      <span class="hidden text-slate-500 sm:inline">
                         &mdash; {s.oneLiner}
                       </span>
                     )}

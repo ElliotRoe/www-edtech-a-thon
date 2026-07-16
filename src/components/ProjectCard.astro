@@ -7,14 +7,38 @@ interface Props {
   /** When set (a Completed project with a gallery entry), the button opens the
    *  Solution Gallery modal for this key instead of following a link. */
   galleryKey?: string | null;
+  /** Denser card for secondary sections that pack more per row (the
+   *  Collaborative Build Cohort); the Project Board grid uses the full size. */
+  compact?: boolean;
 }
 
-const { solution, galleryKey = null } = Astro.props;
+const { solution, galleryKey = null, compact = false } = Astro.props;
 const action = boardCardAction(solution);
 
+// Both size sets spelled out as full literal class strings so Tailwind's
+// scanner keeps them. `clamp` is mirrored onto data-clamp for the toggle script.
+const SIZE = compact
+  ? {
+      accent: "h-1",
+      body: "gap-1.5 p-3",
+      title: "text-sm",
+      clamp: "line-clamp-2",
+      oneLiner: "text-xs",
+      small: "text-[11px]",
+      btnSize: "px-2.5 py-1.5 text-[11px]",
+    }
+  : {
+      accent: "h-1.5",
+      body: "gap-2 p-4",
+      title: "text-base",
+      clamp: "line-clamp-3",
+      oneLiner: "text-sm",
+      small: "text-xs",
+      btnSize: "px-3 py-2 text-xs",
+    };
+
 // Shared button styling for both the modal trigger and the plain link.
-const btnClass =
-  "mt-auto inline-flex items-center justify-center gap-1 rounded-lg border border-primary-500 px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-primary-400 hover:bg-primary-50 hover:text-primary-900 group-hover:border-primary-400 group-hover:bg-primary-50 group-hover:text-primary-900";
+const btnClass = `mt-auto inline-flex items-center justify-center gap-1 rounded-lg border border-primary-500 ${SIZE.btnSize} font-semibold text-slate-700 transition hover:border-primary-400 hover:bg-primary-50 hover:text-primary-900 group-hover:border-primary-400 group-hover:bg-primary-50 group-hover:text-primary-900`;
 
 // Style each card by its Progress. Full literal class strings so Tailwind's
 // scanner keeps them. Empty/unknown progress reads as "Not started".
@@ -43,21 +67,35 @@ const status =
   id={potentialSolutionAnchor(solution.pageId)}
   class="group flex h-full scroll-mt-24 flex-col overflow-hidden rounded-xl border border-b-4 border-slate-400 bg-white transition target:ring-2 target:ring-amber-400 hover:-translate-y-1 hover:shadow-lg"
 >
-  <div class={`h-1.5 w-full ${status.accent}`}></div>
-  <div class="flex h-full flex-col gap-2 p-4">
-    <h3 class="text-base font-bold leading-snug text-slate-900">
+  <div class={`${SIZE.accent} w-full ${status.accent}`}></div>
+  <div class={`flex h-full flex-col ${SIZE.body}`}>
+    <h3 class={`${SIZE.title} font-bold leading-snug text-slate-900`}>
       {solution.name}
     </h3>
     {
       solution.oneLiner && (
-        <p class="line-clamp-3 text-sm leading-snug text-slate-600">
-          {solution.oneLiner}
-        </p>
+        <div>
+          <p
+            data-oneliner
+            data-clamp={SIZE.clamp}
+            class={`${SIZE.clamp} ${SIZE.oneLiner} leading-snug text-slate-600`}
+          >
+            {solution.oneLiner}
+          </p>
+          <button
+            type="button"
+            data-oneliner-toggle
+            aria-expanded="false"
+            class={`hidden ${SIZE.small} font-medium text-slate-400 transition hover:text-slate-700`}
+          >
+            Show more
+          </button>
+        </div>
       )
     }
     {
       solution.contributors && (
-        <p class="line-clamp-1 text-xs text-slate-500">
+        <p class={`line-clamp-1 ${SIZE.small} text-slate-500`}>
           <span class="font-semibold text-slate-600">By</span>{" "}
           {solution.contributors}
         </p>
@@ -85,3 +123,31 @@ const status =
     }
   </div>
 </div>
+
+<script>
+  // The clamp class differs by card size (compact cards clamp tighter), so each
+  // one carries its own in data-clamp rather than sharing a constant.
+  const clampOf = (text: HTMLElement) =>
+    text.dataset.clamp || "line-clamp-3";
+
+  // The toggle is only useful when the one-liner actually overflows its clamp,
+  // which depends on the rendered column width — so measure rather than guess.
+  function syncToggle(text: HTMLElement, toggle: HTMLElement) {
+    if (!text.classList.contains(clampOf(text))) return; // expanded: keep "Show less"
+    toggle.classList.toggle("hidden", text.scrollHeight <= text.clientHeight + 1);
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-oneliner]").forEach((text) => {
+    const toggle = text.nextElementSibling;
+    if (!(toggle instanceof HTMLElement)) return;
+
+    syncToggle(text, toggle);
+    window.addEventListener("resize", () => syncToggle(text, toggle));
+
+    toggle.addEventListener("click", () => {
+      const expanded = !text.classList.toggle(clampOf(text));
+      toggle.textContent = expanded ? "Show less" : "Show more";
+      toggle.setAttribute("aria-expanded", String(expanded));
+    });
+  });
+</script>

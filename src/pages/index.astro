@@ -5,35 +5,54 @@ const developerSignupLink = "/dev";
 const educatorSignupLink =
   "https://docs.google.com/forms/d/e/1FAIpQLSfl48Ojnct2gYtCREvf6d0-OxcJa0QHBfkdRxbdOWf4_V23FQ/viewform?usp=dialog";
 
-type ProblemModule = {
-  frontmatter: {
-    category: string;
-    order?: number;
-    solutionLink?: string;
-    solutionName?: string;
-    title: string;
-  };
-};
+// type ProblemModule = {
+//   frontmatter: {
+//     category: string;
+//     order?: number;
+//     solutionLink?: string;
+//     solutionName?: string;
+//     title: string;
+//   };
+// };
 
-const problemModules = import.meta.glob<ProblemModule>("../problems/*.md", {
-  eager: true,
-});
-const visibleProblemCount = 3;
+// const problemModules = import.meta.glob<ProblemModule>("../problems/*.md", {
+//   eager: true,
+// });
+// const visibleProblemCount = 3;
 
-const problemCards = Object.entries(problemModules)
-  .map(([path, module]) => ({
-    category: module.frontmatter.category,
-    order: module.frontmatter.order ?? Number.MAX_SAFE_INTEGER,
-    slug: path.split("/").pop()?.replace(".md", "") ?? "",
-    solutionLink: module.frontmatter.solutionLink,
-    solutionName: module.frontmatter.solutionName,
-    title: module.frontmatter.title,
-  }))
-  .sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
+// const problemCards = Object.entries(problemModules)
+//   .map(([path, module]) => ({
+//     category: module.frontmatter.category,
+//     order: module.frontmatter.order ?? Number.MAX_SAFE_INTEGER,
+//     slug: path.split("/").pop()?.replace(".md", "") ?? "",
+//     solutionLink: module.frontmatter.solutionLink,
+//     solutionName: module.frontmatter.solutionName,
+//     title: module.frontmatter.title,
+//   }))
+//   .sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
 
-const carouselProblemCards = [
-  ...problemCards,
-  ...problemCards.slice(0, Math.min(visibleProblemCount, problemCards.length)),
+// const carouselProblemCards = [
+//   ...problemCards,
+//   ...problemCards.slice(0, Math.min(visibleProblemCount, problemCards.length)),
+// ];
+
+interface SlidesLink {
+  title: string;
+  href?: string;
+}
+
+const slidesLinks: SlidesLink[] = [
+  {
+    title: "Day 1: Monday",
+    href: "https://docs.google.com/presentation/d/1-EcJIgFOXUZPk1kRqYmuAnWHdZdQ9STtKbchYY8z2EE/edit?usp=sharing",
+  },
+  {
+    title: "Day 2: Tuesday",
+    href: "https://docs.google.com/presentation/d/1hK9y1EsxqPtEg5GI--TfDFop7i5wgCVrBHmgcKoy4hY/edit?usp=sharing",
+  },
+  {
+    title: "Day 3: Wednesday",
+  },
 ];
 
 const faqs = [
@@ -162,6 +181,32 @@ const organizers = [
           >
         </div>
       </div>
+    </div>
+    <div class="flex flex-wrap flex-col sm:flex-row gap-4 mt-4">
+      {
+        slidesLinks.map((link) => (
+          <a
+            href={link.href}
+            class:list={[
+              "flex items-center gap-3 bg-white border border-gray-400 px-6 py-3 rounded-md",
+              {
+                "hover:bg-gray-100 active:bg-gray-200": !!link.href,
+                "opacity-50 cursor-not-allowed select-none": !link.href,
+              },
+            ]}
+          >
+            <img
+              class="grow shrink max-w-16!"
+              src="/google-slides-logo.png"
+              alt="Google Slides logo"
+            />
+            <div class="whitespace-nowrap">
+              <div class="font-bold">{link.title}</div>
+              <div>Google Slides</div>
+            </div>
+          </a>
+        ))
+      }
     </div>
   </section>
   <section class="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-center">

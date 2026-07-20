@@ -4,6 +4,16 @@ import svelte from "@astrojs/svelte";
 import tailwindcss from "@tailwindcss/vite";
 
 export default defineConfig({
+  // Static API routes are emitted as plain files, so their Response headers
+  // are not retained in the build output. Astro's dev/preview server does not
+  // read public/_headers; set CORS here as well so project subdomains can read
+  // the metadata API when the site is served by Astro.
+  server: {
+    headers: {
+      "Access-Control-Allow-Origin": "*",
+    },
+  },
+
   redirects: {
     "/form":
       "https://docs.google.com/forms/d/e/1FAIpQLSe0axLrX6rW9X-Og9-UCs_NVkcq1M66opaFRXuF8yu3M3JRBw/viewform?usp=dialog",

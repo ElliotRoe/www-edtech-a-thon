@@ -17,6 +17,7 @@ type ScheduleDay = {
   date: string;
   timezones: { zone: string; range: string }[];
   events: ScheduleEvent[];
+  slides?: string;
 };
 
 const days: ScheduleDay[] = [
@@ -51,6 +52,8 @@ const days: ScheduleDay[] = [
           "Meet educators from around the globe in fun, fast-paced online ice breaker discussions. We'll break into small groups to talk through the problems you submitted, rapidly brainstorm solutions together, and learn from what other teachers are already doing. A great way to meet people who teach similar subjects, face similar hurdles, or are just cool to know.",
       },
     ],
+    slides:
+      "https://docs.google.com/presentation/d/1-EcJIgFOXUZPk1kRqYmuAnWHdZdQ9STtKbchYY8z2EE/edit?usp=sharing",
   },
   {
     label: "Day 2",
@@ -84,6 +87,8 @@ const days: ScheduleDay[] = [
         note: "Please join on a laptop — this is a hands-on session and you'll be building as we go.",
       },
     ],
+    slides:
+      "https://docs.google.com/presentation/d/1hK9y1EsxqPtEg5GI--TfDFop7i5wgCVrBHmgcKoy4hY/edit?usp=sharing",
   },
   {
     label: "Day 3",
@@ -203,13 +208,21 @@ const days: ScheduleDay[] = [
           ))}
         </div>
 
-        <div class="mt-6">
+        <div class="mt-6 flex gap-4">
           <a
             class="inline-block cursor-pointer px-6 py-3 text-base rounded-full text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
             href="/join"
           >
             Open the Zoom
           </a>
+          {day.slides && (
+            <a
+              class="inline-block cursor-pointer px-6 py-3 text-base rounded-full text-white bg-yellow-600 hover:bg-yellow-700 active:bg-yellow-800"
+              href={day.slides}
+            >
+              Open the Slides
+            </a>
+          )}
         </div>
       </section>
     ))

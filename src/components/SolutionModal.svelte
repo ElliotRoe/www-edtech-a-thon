@@ -130,7 +130,7 @@
               rel="noopener noreferrer"
               class="inline-flex items-center gap-1 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-primary-400 hover:bg-primary-50 hover:text-primary-900"
             >
-              Give feedback
+              Forum <span aria-hidden="true">&nearr;</span>
             </a>
           {/if}
         </div>

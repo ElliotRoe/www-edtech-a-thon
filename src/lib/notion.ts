@@ -45,8 +45,10 @@ export const POTENTIAL_SOLUTION_PROPS = {
   problemsCovered: "Problems Covered",
   oneLiner: "One-Liner", // rich text — short one-sentence description shown on the card
   contributors: "Contributors", // rich text — contributor names (may be empty)
+  authorLine: "Author Line", // rich text — author credit shown in the progress modal
   progress: "Progress", // select: "Not Started" | "In-Progress" | "Completed"
   forumLink: "Forum Link", // url — forum post for the in-progress project
+  youtubeLink: "Youtube Link", // url — YouTube progress video shown in the project modal
   githubLink: "Github Link", // url — GitHub repository for the project
   solutionLink: "Solution Link", // url — link to the finished solution
 } as const;

@@ -48,10 +48,14 @@ export interface BoardSolution {
   oneLiner: string;
   /** Contributor names (may be empty). */
   contributors: string;
+  /** Display-ready author credit for the progress modal (may be empty). */
+  authorLine: string;
   /** "Not Started" | "In-Progress" | "Completed" (may be empty). */
   progress: string;
   /** Forum post URL, normalized; "" when unset. */
   forumLink: string;
+  /** YouTube progress-video URL, normalized; "" when unset. */
+  youtubeLink: string;
   /** Finished-solution URL, normalized; "" when unset. */
   solutionLink: string;
   problems: ProblemLink[];
@@ -74,8 +78,10 @@ export async function getBoardSolutions(
       accepted: s.data.accepted,
       oneLiner: s.data.oneLiner,
       contributors: s.data.contributors,
+      authorLine: s.data.authorLine,
       progress: s.data.progress,
       forumLink: normalizeUrl(s.data.forumLink),
+      youtubeLink: normalizeUrl(s.data.youtubeLink),
       solutionLink: normalizeUrl(s.data.solutionLink),
       problems: s.data.problemIds
         .map(lookup)
@@ -131,30 +137,28 @@ export async function getSolversByProblem(): Promise<
   return map;
 }
 
-/** Prefix bare hostnames (e.g. "vocabsleuth.com") with https:// for a valid href. */
-export function normalizeUrl(url: string): string {
-  const u = url.trim();
+/** Prefix bare hostnames (e.g. "vocabsleuth.com") with https:// for a valid
+ * href. Missing values can occur briefly when Astro has cached older content. */
+export function normalizeUrl(url: string | null | undefined): string {
+  const u = url?.trim() ?? "";
   if (!u) return "";
   return /^https?:\/\//i.test(u) ? u : `https://${u}`;
 }
 
 /**
  * The call-to-action for a Project Board card, driven by its Progress + link.
- * Completed → finished solution; In-Progress → forum post; otherwise (Not
- * Started, or no specific link) fall back to the forum to invite contribution.
- * Null only when there's no usable link at all.
+ * Completed → finished solution; not-started projects → forum post to
+ * invite contribution. In-progress projects open an on-page progress modal and
+ * therefore do not have an external card action here.
  */
 export function boardCardAction(
   solution: BoardSolution,
 ): { label: string; href: string } | null {
   if (solution.progress === "Completed" && solution.solutionLink) {
-    return { label: "See solution", href: solution.solutionLink };
+    return { label: "Open", href: solution.solutionLink };
   }
-  if (solution.progress === "In-Progress" && solution.forumLink) {
-    return { label: "See progress", href: solution.forumLink };
-  }
-  if (solution.forumLink) {
-    return { label: "Contribute", href: solution.forumLink };
+  if (solution.progress !== "In-Progress" && solution.forumLink) {
+    return { label: "Open", href: solution.forumLink };
   }
   return null;
 }
@@ -192,8 +196,8 @@ export async function getBoardProgress(): Promise<BoardProgress> {
 // --- Solution Gallery (completed solutions) ----------------------------------
 
 /** Extract a YouTube video id from watch/short/embed URLs, else "". */
-export function youtubeId(url: string): string {
-  const u = url.trim();
+export function youtubeId(url: string | null | undefined): string {
+  const u = url?.trim() ?? "";
   if (!u) return "";
   const patterns = [
     /[?&]v=([A-Za-z0-9_-]{11})/, // watch?v=ID

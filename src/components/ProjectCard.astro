@@ -1,6 +1,6 @@
 ---
 import type { BoardSolution } from "../lib/board";
-import { boardCardAction, potentialSolutionAnchor } from "../lib/board";
+import { potentialSolutionAnchor } from "../lib/board";
 
 interface Props {
   solution: BoardSolution;
@@ -13,7 +13,6 @@ interface Props {
 }
 
 const { solution, galleryKey = null, compact = false } = Astro.props;
-const action = boardCardAction(solution);
 
 // Both size sets spelled out as full literal class strings so Tailwind's
 // scanner keeps them. `clamp` is mirrored onto data-clamp for the toggle script.
@@ -38,7 +37,7 @@ const SIZE = compact
     };
 
 // Shared button styling for both the modal trigger and the plain link.
-const btnClass = `mt-auto inline-flex items-center justify-center gap-1 rounded-lg border border-primary-500 ${SIZE.btnSize} font-semibold text-slate-700 transition hover:border-primary-400 hover:bg-primary-50 hover:text-primary-900 group-hover:border-primary-400 group-hover:bg-primary-50 group-hover:text-primary-900`;
+const btnClass = `mt-auto inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 ${SIZE.btnSize} font-semibold text-slate-700 transition hover:border-primary-400 hover:bg-primary-50 hover:text-primary-900 group-hover:border-primary-400 group-hover:bg-primary-50 group-hover:text-primary-900`;
 
 // Style each card by its Progress. Full literal class strings so Tailwind's
 // scanner keeps them. Empty/unknown progress reads as "Not started".
@@ -69,9 +68,37 @@ const status =
 >
   <div class={`${SIZE.accent} w-full ${status.accent}`}></div>
   <div class={`flex h-full flex-col ${SIZE.body}`}>
-    <h3 class={`${SIZE.title} font-bold leading-snug text-slate-900`}>
-      {solution.name}
-    </h3>
+    <div class="flex items-start justify-between gap-2">
+      <h3 class={`${SIZE.title} font-bold leading-snug text-slate-900`}>
+        {solution.name}
+      </h3>
+      {
+        solution.forumLink && (
+          <a
+            href={solution.forumLink}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Open forum for ${solution.name}`}
+            class="shrink-0 rounded-md p-1 text-slate-400 transition hover:bg-primary-50 hover:text-primary-700"
+          >
+            <svg
+              viewBox="0 0 24 24"
+              class="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
+              />
+            </svg>
+          </a>
+        )
+      }
+    </div>
     {
       solution.oneLiner && (
         <div>
@@ -104,21 +131,18 @@ const status =
     {
       galleryKey ? (
         <button type="button" data-solution-open={galleryKey} class={btnClass}>
-          See solution
+          Open
           <span aria-hidden="true">&rarr;</span>
         </button>
       ) : (
-        action && (
-          <a
-            href={action.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            class={btnClass}
-          >
-            {action.label}
-            <span aria-hidden="true">&rarr;</span>
-          </a>
-        )
+        <button
+          type="button"
+          data-progress-open={solution.pageId}
+          class={btnClass}
+        >
+          Open
+          <span aria-hidden="true">&rarr;</span>
+        </button>
       )
     }
   </div>

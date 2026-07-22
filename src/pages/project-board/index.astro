@@ -2,12 +2,12 @@
 import Layout from "../../components/Layout.astro";
 import ProgressBar from "../../components/ProgressBar.astro";
 import ProjectCard from "../../components/ProjectCard.astro";
+import ProjectProgressModal from "../../components/ProjectProgressModal.svelte";
 import SolutionModal from "../../components/SolutionModal.svelte";
 import {
   getBoardSolutions,
   getBoardProgress,
   getGalleryForBoard,
-  boardCardAction,
   potentialSolutionAnchor,
 } from "../../lib/board";
 
@@ -20,6 +20,15 @@ const [projects, vibeCode, extraCredit, progress, gallery] = await Promise.all([
 ]);
 // Resolve a completed project to the gallery key that opens its modal.
 const { items: galleryItems, keyFor } = gallery;
+const progressItems = [...projects, ...vibeCode, ...extraCredit]
+  .map((solution) => ({
+    key: solution.pageId,
+    name: solution.name,
+    authorLine: solution.authorLine,
+    description: solution.oneLiner,
+    videoLink: solution.youtubeLink,
+    forumLink: solution.forumLink,
+  }));
 
 // Compact-list status label + dot colour for the Extra Credit rows.
 const EC_STATUS: Record<string, { label: string; dot: string }> = {
@@ -38,8 +47,8 @@ const ecStatus = (p: string) =>
         Project Board
       </h1>
       <p class="mt-2 text-slate-600">
-        The solutions our teams are building at EdTech-a-thon. Jump into a
-        project's forum thread to follow along or contribute.
+        The solutions our teams are building at EdTech-a-thon. Open a project
+        to learn more and watch its progress video.
       </p>
     </div>
 
@@ -95,21 +104,22 @@ const ecStatus = (p: string) =>
           <ul class="mt-3 flex flex-col divide-y divide-slate-200 overflow-hidden rounded-lg border border-slate-300 bg-white">
             {extraCredit.map((s) => {
               const st = ecStatus(s.progress);
-              // Completed with a gallery entry → open modal; otherwise link to
-              // the solution (completed) or forum thread (to contribute).
+              // Completed projects with gallery entries open that modal; every
+              // other project opens the shared project-details modal.
               const modalKey = keyFor(s);
-              const href = modalKey ? "" : boardCardAction(s)?.href ?? "";
-              const Row = modalKey ? "button" : href ? "a" : "div";
+              const progressKey = modalKey ? null : s.pageId;
+              const Row = "button";
               const rowProps = modalKey
                 ? { type: "button", "data-solution-open": modalKey }
-                : href
-                  ? { href, target: "_blank", rel: "noopener noreferrer" }
-                  : {};
+                : { type: "button", "data-progress-open": progressKey };
               return (
-                <li id={potentialSolutionAnchor(s.pageId)} class="scroll-mt-24 target:bg-amber-50">
+                <li
+                  id={potentialSolutionAnchor(s.pageId)}
+                  class="scroll-mt-24 target:bg-amber-50"
+                >
                   <Row
                     {...rowProps}
-                    class={`flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm ${modalKey || href ? "transition hover:bg-slate-50" : ""}`}
+                    class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm transition hover:bg-slate-50"
                   >
                     <span
                       class={`h-2.5 w-2.5 shrink-0 rounded-full ${st.dot}`}
@@ -144,20 +154,35 @@ const ecStatus = (p: string) =>
       </a>
     </div>
 
-    {galleryItems.length > 0 && <SolutionModal client:load items={galleryItems} />}
+    {progressItems.length > 0 && (
+      <ProjectProgressModal client:load items={progressItems} />
+    )}
+    {galleryItems.length > 0 && (
+      <SolutionModal client:load items={galleryItems} />
+    )}
   </section>
 </Layout>
 
 <script>
-  // Completed project cards / extra-credit rows carry `data-solution-open` with
-  // a gallery key; forward clicks to the SolutionModal island via a window event.
+  // Modal triggers live in Astro-rendered cards/rows, so forward clicks to the
+  // appropriate Svelte island via a window event.
   document.addEventListener("click", (e) => {
-    const el = (e.target as HTMLElement).closest("[data-solution-open]");
+    const el = (e.target as HTMLElement).closest(
+      "[data-solution-open], [data-progress-open]",
+    );
     if (!el) return;
-    const key = el.getAttribute("data-solution-open");
+    const isProgress = el.hasAttribute("data-progress-open");
+    const key = el.getAttribute(
+      isProgress ? "data-progress-open" : "data-solution-open",
+    );
     if (key) {
       e.preventDefault();
-      window.dispatchEvent(new CustomEvent("open-solution", { detail: key }));
+      window.dispatchEvent(
+        new CustomEvent(
+          isProgress ? "open-project-progress" : "open-solution",
+          { detail: key },
+        ),
+      );
     }
   });
 </script>

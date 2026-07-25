@@ -1,9 +1,7 @@
 ---
+import { Image } from "astro:assets";
 import Layout from "../components/Layout.astro";
-
-const developerSignupLink = "/dev";
-const educatorSignupLink =
-  "https://docs.google.com/forms/d/e/1FAIpQLSfl48Ojnct2gYtCREvf6d0-OxcJa0QHBfkdRxbdOWf4_V23FQ/viewform?usp=dialog";
+import edtechathon2026Group from "../assets/edtechathon-2026-group.jpeg";
 
 // type ProblemModule = {
 //   frontmatter: {
@@ -142,74 +140,14 @@ const organizers = [
 ---
 
 <Layout>
-  <section>
-    <div
-      class="bg-primary-100 border border-b-4 border-primary-400 rounded-xl grid place-items-center md:grid-cols-2"
-    >
-      <div
-        class="p-6 border-b md:border-b-0 md:border-r border-dashed border-primary-400"
-      >
-        <div class="text-center">Join us live in...</div>
-        <h2 class="font-display text-center text-2xl mb-4">The Perma-Zoom</h2>
-        <div class="text-center text-lg">
-          Open 9am - 5pm EDT, the Perma-Zoom is an always-open Zoom room running
-          throughout all three days. It is used for our <a
-            href="/schedule"
-            class="text-primary-500 hover:text-primary-700 underline font-medium"
-            >scheduled events</a
-          >, and during off times it is an open room. Pop in any time and say
-          hi!
-        </div>
-        <div class="flex justify-center mt-4">
-          <a
-            class="inline-block cursor-pointer px-8 py-4 text-lg rounded-full text-white bg-blue-600 hover:bg-blue-700 active:bg-blue-800"
-            href="/join">Open the Zoom</a
-          >
-        </div>
-      </div>
-      <div class="p-6">
-        <div class="text-center">Collaborate on...</div>
-        <h2 class="font-display text-center text-2xl mb-4">The Forum</h2>
-        <div class="text-center text-lg">
-          The forum is our public hub for collaboration. Come see the progress
-          being made on different projects, provide feedback, and communicate
-          with the folks building them.
-        </div>
-        <div class="flex justify-center mt-4">
-          <a
-            class="inline-block cursor-pointer px-8 py-4 text-lg rounded-full text-white bg-primary-600 hover:bg-primary-700 active:bg-primary-800"
-            href="https://forum.edtechathon.com">Open the Forum</a
-          >
-        </div>
-      </div>
-    </div>
-    <div class="flex flex-wrap flex-col sm:flex-row gap-4 mt-4">
-      {
-        slidesLinks.map((link) => (
-          <a
-            href={link.href}
-            class:list={[
-              "flex items-center gap-3 bg-white border border-gray-400 px-6 py-3 rounded-md",
-              {
-                "hover:bg-gray-100 active:bg-gray-200": !!link.href,
-                "opacity-50 cursor-not-allowed select-none": !link.href,
-              },
-            ]}
-          >
-            <img
-              class="grow shrink max-w-16!"
-              src="/google-slides-logo.png"
-              alt="Google Slides logo"
-            />
-            <div class="whitespace-nowrap">
-              <div class="font-bold">{link.title}</div>
-              <div>Google Slides</div>
-            </div>
-          </a>
-        ))
-      }
-    </div>
-  </section>
+  <aside
+    slot="announcement"
+    aria-label="Event status"
+    class="rounded-full border border-primary-400 bg-primary-100 px-2 py-1 text-center font-semibold text-primary-950 w-fit text-sm mx-auto mt-5"
+  >
+    EdTech-a-thon 2026 is over!
+  </aside>
+
   <section class="grid gap-8 lg:grid-cols-[1fr_360px] lg:items-center">
     <div class="flex flex-col gap-5">
       <h1 class="text-xl text-slate-600 uppercase">
@@ -235,86 +173,18 @@ const organizers = [
         <img src="/hero-2.jpg" alt="" />
       </figure>
       <figure class="polaroid polaroid-front">
-        <img src="/hero-1.jpg" alt="Educators and developers collaborating" />
+        <Image
+          src={edtechathon2026Group}
+          alt="EdTech-a-thon 2026 participants gathered in Atlanta with virtual attendees joining onscreen"
+          width={576}
+          widths={[320, 576]}
+          sizes="(min-width: 1024px) 336px, 288px"
+          loading="eager"
+          fetchpriority="high"
+        />
       </figure>
     </div>
   </section>
-
-  <div class="grid md:grid-cols-2 gap-8">
-    <div>
-      <h2 class="text-2xl font-extrabold text-slate-950 sm:text-3xl">
-        For Educators...
-      </h2>
-      <div class="mt-6 border border-slate-400 border-b-4 bg-white rounded-lg">
-        <div class="p-6">
-          <h3 class="text-xl font-extrabold text-slate-950 sm:text-2xl">
-            Join us
-          </h3>
-          <p class="mt-1 text-lg leading-7 text-slate-700">
-            Attend our 3-day event virtually or in-person. Collaborate with
-            other educators, get your problems solved, and learn practical
-            EdTech skills you'll actually use.
-          </p>
-          <div class="mt-4 flex flex-col gap-3 sm:flex-row">
-            <a
-              href={educatorSignupLink}
-              target="_blank"
-              rel="noreferrer"
-              class="w-full rounded-full inline-flex items-center justify-center bg-primary-200 px-5 py-3 text-sm font-bold text-primary-900 transition hover:bg-primary-100 sm:w-auto"
-            >
-              Register to Participate
-            </a>
-            <a
-              href="/schedule"
-              class="w-full rounded-full inline-flex items-center justify-center border border-slate-300 bg-white px-5 py-3 text-sm font-bold text-slate-800 transition hover:bg-slate-50 sm:w-auto"
-            >
-              View Schedule
-            </a>
-          </div>
-        </div>
-        <p
-          class="text-slate-600 text-base border-t w-full border-dashed border-slate-400 bg-slate-100 rounded-b-md px-6 py-4"
-        >
-          Or email us about joining in-person at <a
-            href="mailto:directors@edtechathon.com"
-            class="underline decoration-dashed decoration-2 decoration-slate-700/50 underline-offset-4 hover:bg-slate-100 hover:decoration-solid"
-            >directors@edtechathon.com</a
-          >
-        </p>
-      </div>
-    </div>
-    <div>
-      <h2 class="text-2xl font-extrabold text-slate-950 sm:text-3xl">
-        For Developers...
-      </h2>
-      <div class="mt-6 border border-slate-400 border-b-4 bg-white rounded-lg">
-        <div class="p-6">
-          <h3 class="text-xl font-extrabold text-slate-950 sm:text-2xl">
-            Help develop solutions
-          </h3>
-          <p class="mt-1 text-lg leading-7 text-slate-700">
-            Work with a small team of developers to solve an educator's
-            real-life problem, then deploy your open-source solution for use in
-            classrooms everywhere.
-          </p>
-          <a
-            href={developerSignupLink}
-            target="_blank"
-            rel="noreferrer"
-            class="mt-4 w-full rounded-full inline-flex items-center justify-center bg-primary-200 px-5 py-3 text-sm font-bold text-primary-900 transition hover:bg-primary-100 sm:w-auto"
-          >
-            Apply to Build
-          </a>
-        </div>
-        <p
-          class="text-slate-600 text-base border-t w-full border-dashed border-slate-400 bg-slate-100 rounded-b-md px-6 py-4"
-        >
-          If you're unsure whether or not you qualify as a developer, apply
-          anyways! We'll reach out.
-        </p>
-      </div>
-    </div>
-  </div>
 
   <!--
   <section aria-labelledby="problem-board">

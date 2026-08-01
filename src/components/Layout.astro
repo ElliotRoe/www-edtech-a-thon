@@ -16,6 +16,12 @@ const navLinks = [
 // Active when the current path is (or is nested under) the link's path.
 const path = Astro.url.pathname.replace(/\/$/, "");
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+
+// Cloudflare Web Analytics. Injected here rather than relying on Cloudflare's
+// automatic injection, which silently stopped firing in July 2026. The token is
+// public (it ships in the HTML), but keep it in the environment so it is set
+// once per deploy target instead of hardcoded.
+const cfBeaconToken = import.meta.env.CF_BEACON_TOKEN;
 ---
 
 <!doctype html>
@@ -96,5 +102,15 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
       </footer>
     </main>
     <slot name="scripts" />
+    {
+      cfBeaconToken && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: cfBeaconToken })}
+        />
+      )
+    }
   </body>
 </html>

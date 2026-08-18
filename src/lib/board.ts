@@ -1,4 +1,5 @@
 import { getCollection } from "astro:content";
+import type { ImageMetadata } from "astro";
 
 /** A covered/related problem, ready to render: `href` is null when the problem
  *  isn't publishable (no detail page exists), in which case show the title only. */
@@ -52,8 +53,6 @@ export interface BoardSolution {
   authorLine: string;
   /** "Not Started" | "In-Progress" | "Completed" (may be empty). */
   progress: string;
-  /** Forum post URL, normalized; "" when unset. */
-  forumLink: string;
   /** YouTube progress-video URL, normalized; "" when unset. */
   youtubeLink: string;
   /** Finished-solution URL, normalized; "" when unset. */
@@ -80,7 +79,6 @@ export async function getBoardSolutions(
       contributors: s.data.contributors,
       authorLine: s.data.authorLine,
       progress: s.data.progress,
-      forumLink: normalizeUrl(s.data.forumLink),
       youtubeLink: normalizeUrl(s.data.youtubeLink),
       solutionLink: normalizeUrl(s.data.solutionLink),
       problems: s.data.problemIds
@@ -92,7 +90,7 @@ export async function getBoardSolutions(
 
 export interface ProblemSolvers {
   potential: { pageId: string; name: string; accepted: string; href: string }[];
-  completed: { pageId: string; name: string; url: string }[];
+  completed: { id: string; name: string; url: string }[];
 }
 
 /**
@@ -103,10 +101,16 @@ export interface ProblemSolvers {
 export async function getSolversByProblem(): Promise<
   Map<string, ProblemSolvers>
 > {
-  const [potential, completed] = await Promise.all([
+  const [potential, completed, problemIndex] = await Promise.all([
     getCollection("potentialSolutions"),
     getCollection("solutions"),
+    getCollection("problemsIndex"),
   ]);
+  const pageIdByProblemSlug = new Map(
+    problemIndex
+      .filter((problem) => problem.data.prId)
+      .map((problem) => [problem.data.prId.toLowerCase(), problem.data.pageId]),
+  );
   const map = new Map<string, ProblemSolvers>();
   const bucket = (pid: string) => {
     let b = map.get(pid);
@@ -126,11 +130,13 @@ export async function getSolversByProblem(): Promise<
     }
   }
   for (const s of completed) {
-    for (const pid of s.data.problemIds) {
-      bucket(pid).completed.push({
-        pageId: s.data.pageId,
-        name: s.data.name,
-        url: normalizeUrl(s.data.url),
+    for (const problemSlug of s.data.problems) {
+      const pageId = pageIdByProblemSlug.get(problemSlug.toLowerCase());
+      if (!pageId) continue;
+      bucket(pageId).completed.push({
+        id: s.id,
+        name: s.data.title,
+        url: normalizeUrl(s.data.solutionUrl),
       });
     }
   }
@@ -143,24 +149,6 @@ export function normalizeUrl(url: string | null | undefined): string {
   const u = url?.trim() ?? "";
   if (!u) return "";
   return /^https?:\/\//i.test(u) ? u : `https://${u}`;
-}
-
-/**
- * The call-to-action for a Project Board card, driven by its Progress + link.
- * Completed → finished solution; not-started projects → forum post to
- * invite contribution. In-progress projects open an on-page progress modal and
- * therefore do not have an external card action here.
- */
-export function boardCardAction(
-  solution: BoardSolution,
-): { label: string; href: string } | null {
-  if (solution.progress === "Completed" && solution.solutionLink) {
-    return { label: "Open", href: solution.solutionLink };
-  }
-  if (solution.progress !== "In-Progress" && solution.forumLink) {
-    return { label: "Open", href: solution.forumLink };
-  }
-  return null;
 }
 
 export interface BoardProgress {
@@ -230,19 +218,20 @@ export function solutionKey(name: string): string {
 }
 
 export interface GalleryItem {
-  /** Stable id used to open this item's modal from anywhere. */
+  /** Stable filename-derived slug. */
   key: string;
   name: string;
   oneLiner: string;
-  description: string;
+  /** Rendered, trusted Markdown body for the quick-preview modal. */
+  descriptionHtml: string;
   /** Live/built solution URL, normalized; "" when unset. */
   link: string;
-  /** Forum thread for feedback, normalized; "" when unset. */
-  forumLink: string;
   /** Embeddable showcase video URL; "" when none/unparseable. */
   videoEmbed: string;
   /** Showcase video thumbnail URL; "" when none. */
   videoThumb: string;
+  /** Optional local screenshot used only when there is no video thumbnail. */
+  screenshot?: ImageMetadata;
   builtBy: string;
   /** Human-formatted completion date (e.g. "Jul 20, 2026"); "" when unset. */
   date: string;
@@ -254,7 +243,7 @@ const GALLERY_MONTHS = [
 ];
 
 /** Format an ISO date-only string without timezone drift. */
-function formatGalleryDate(iso: string): string {
+export function formatGalleryDate(iso: string): string {
   const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(iso);
   if (!m) return "";
   return `${GALLERY_MONTHS[Number(m[2]) - 1]} ${Number(m[3])}, ${m[1]}`;
@@ -262,9 +251,8 @@ function formatGalleryDate(iso: string): string {
 
 /**
  * Gallery items plus a resolver from a Project Board project to the gallery
- * `key` that opens its modal — matched on the shared solution URL first, then
- * the name. Returns null when the project isn't Completed or has no gallery
- * entry (the card then falls back to a plain link).
+ * key that opens its modal — matched on the shared solution URL first, then
+ * the name. Returns null when the project isn't Completed or has no entry.
  */
 export async function getGalleryForBoard(): Promise<{
   items: GalleryItem[];
@@ -274,7 +262,7 @@ export async function getGalleryForBoard(): Promise<{
   const byUrl = new Map(
     items.filter((g) => g.link).map((g) => [g.link, g.key]),
   );
-  const byName = new Map(items.map((g) => [g.key, g.key]));
+  const byName = new Map(items.map((g) => [solutionKey(g.name), g.key]));
   const keyFor = (s: BoardSolution): string | null => {
     if (s.progress !== "Completed") return null;
     return (
@@ -291,17 +279,17 @@ export async function getSolutionGallery(): Promise<GalleryItem[]> {
   const rows = await getCollection("solutions");
   return rows
     .map((row) => ({
-      key: solutionKey(row.data.name),
-      name: row.data.name,
+      key: row.id,
+      name: row.data.title,
       oneLiner: row.data.oneLiner,
-      description: row.data.description,
-      link: normalizeUrl(row.data.url),
-      forumLink: normalizeUrl(row.data.forumLink),
+      descriptionHtml: row.rendered?.html ?? "",
+      link: normalizeUrl(row.data.solutionUrl),
       videoEmbed: youtubeEmbedUrl(row.data.showcaseVideo),
       videoThumb: youtubeThumb(row.data.showcaseVideo),
+      screenshot: row.data.screenshot,
       builtBy: row.data.builtBy,
-      date: formatGalleryDate(row.data.date),
-      sortKey: row.data.date,
+      date: formatGalleryDate(row.data.completedAt),
+      sortKey: row.data.completedAt,
     }))
     // Most recently completed first.
     .sort((a, b) => b.sortKey.localeCompare(a.sortKey))

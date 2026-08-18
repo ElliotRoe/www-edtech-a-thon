@@ -1,4 +1,5 @@
 import { defineCollection } from "astro:content";
+import { glob } from "astro/loaders";
 import { z } from "astro/zod";
 import {
   GROUP_PROPS,
@@ -6,7 +7,6 @@ import {
   POTENTIAL_SOLUTION_PROPS,
   PROBLEM_PROPS,
   readCheckbox,
-  readDate,
   readRelationIds,
   readRichText,
   readRollupRelationIds,
@@ -14,11 +14,11 @@ import {
   readTitle,
   readUniqueId,
   readUrl,
-  SOLUTION_PROPS,
 } from "./lib/notion";
 
 /**
- * Both collections are sourced from Notion at build time (see ./lib/notion.ts).
+ * The workflow collections below are sourced from Notion at build time (see
+ * ./lib/notion.ts). Completed solutions are a curated Markdown collection.
  *
  * PII / redaction gate:
  *  - The `problems` loader filters to `Publishable = true`, so unpublishable rows
@@ -146,7 +146,6 @@ const potentialSolutions = defineCollection({
         contributors: readRichText(props, POTENTIAL_SOLUTION_PROPS.contributors),
         authorLine: readRichText(props, POTENTIAL_SOLUTION_PROPS.authorLine),
         progress: readSelect(props, POTENTIAL_SOLUTION_PROPS.progress),
-        forumLink: readUrl(props, POTENTIAL_SOLUTION_PROPS.forumLink),
         youtubeLink: readUrl(props, POTENTIAL_SOLUTION_PROPS.youtubeLink),
         githubLink: readUrl(props, POTENTIAL_SOLUTION_PROPS.githubLink),
         solutionLink: readUrl(props, POTENTIAL_SOLUTION_PROPS.solutionLink),
@@ -166,7 +165,6 @@ const potentialSolutions = defineCollection({
     contributors: z.string(),
     authorLine: z.string(),
     progress: z.string(),
-    forumLink: z.string(),
     youtubeLink: z.string(),
     githubLink: z.string(),
     solutionLink: z.string(),
@@ -174,42 +172,26 @@ const potentialSolutions = defineCollection({
   }),
 });
 
-/** Completed, shipped solutions for the gallery. */
+/**
+ * Completed, shipped solutions for the gallery. These are curated Markdown
+ * documents rather than workflow records, so they live in the repository and
+ * get full Astro content rendering plus stable, filename-based routes.
+ */
 const solutions = defineCollection({
-  loader: notionLoader({
-    name: "completed solutions",
-    databaseIdEnv: "NOTION_SOLUTIONS_DB_ID",
-    map: (page) => {
-      const props = page.properties;
-      const name = readTitle(props, SOLUTION_PROPS.title);
-      if (!name) return null;
-      return {
-        id: page.id,
-        pageId: page.id,
-        name,
-        url: readUrl(props, SOLUTION_PROPS.link),
-        builtBy: readRichText(props, SOLUTION_PROPS.builtBy),
-        date: readDate(props, SOLUTION_PROPS.date),
-        oneLiner: readRichText(props, SOLUTION_PROPS.oneLiner),
-        description: readRichText(props, SOLUTION_PROPS.description),
-        forumLink: readUrl(props, SOLUTION_PROPS.forumLink),
-        showcaseVideo: readUrl(props, SOLUTION_PROPS.showcaseVideo),
-        problemIds: readRelationIds(props, SOLUTION_PROPS.problems),
-      };
-    },
-  }),
-  schema: z.object({
-    pageId: z.string(),
-    name: z.string(),
-    url: z.string(),
-    builtBy: z.string(),
-    date: z.string(),
-    oneLiner: z.string(),
-    description: z.string(),
-    forumLink: z.string(),
-    showcaseVideo: z.string(),
-    problemIds: z.array(z.string()),
-  }),
+  loader: glob({ base: "./src/content/solutions", pattern: "**/*.md" }),
+  schema: ({ image }) =>
+    z.object({
+      title: z.string(),
+      oneLiner: z.string().default(""),
+      builtBy: z.string().default(""),
+      completedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+      solutionUrl: z.string().default(""),
+      showcaseVideo: z.string().default(""),
+      /** Local image path, resolved relative to the Markdown file. */
+      screenshot: image().optional(),
+      /** Problem Database slugs such as `pr-258`. */
+      problems: z.array(z.string()).default([]),
+    }),
 });
 
 export const collections = {

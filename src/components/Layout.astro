@@ -3,9 +3,14 @@ import "../styles/global.css";
 
 interface Props {
   title?: string | string[];
+  /** Use a tighter header/content rhythm for dense index pages. */
+  compactContent?: boolean;
 }
 
-const { title } = Astro.props;
+const { title, compactContent = false } = Astro.props;
+const pageGap = compactContent
+  ? "gap-6"
+  : "gap-12 sm:gap-16 md:gap-20";
 
 const navLinks = [
   { href: "/project-board", label: "Project Board" },
@@ -47,7 +52,7 @@ const cfBeaconToken = import.meta.env.CF_BEACON_TOKEN;
   </head>
   <body class="text-slate-950">
     <main
-      class="page-shell mx-auto flex w-full max-w-5xl flex-col gap-12 px-4 py-6 sm:gap-16 sm:px-8 md:gap-20 lg:px-20"
+      class={`page-shell mx-auto flex w-full max-w-5xl flex-col ${pageGap} px-4 py-6 sm:px-8 lg:px-20`}
     >
       <div class="flex flex-col gap-4">
         <header

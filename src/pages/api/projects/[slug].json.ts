@@ -6,7 +6,6 @@ interface ProjectLinks {
   slug: string;
   name: string;
   oneLiner: string;
-  forumLink: string;
   githubLink: string;
 }
 
@@ -34,7 +33,6 @@ export async function getStaticPaths() {
       slug,
       name: project.data.name,
       oneLiner: project.data.oneLiner,
-      forumLink: normalizeUrl(project.data.forumLink),
       githubLink: normalizeUrl(project.data.githubLink),
     };
 

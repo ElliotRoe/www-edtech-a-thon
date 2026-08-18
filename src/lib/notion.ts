@@ -47,22 +47,9 @@ export const POTENTIAL_SOLUTION_PROPS = {
   contributors: "Contributors", // rich text — contributor names (may be empty)
   authorLine: "Author Line", // rich text — author credit shown in the progress modal
   progress: "Progress", // select: "Not Started" | "In-Progress" | "Completed"
-  forumLink: "Forum Link", // url — forum post for the in-progress project
   youtubeLink: "Youtube Link", // url — YouTube progress video shown in the project modal
   githubLink: "Github Link", // url — GitHub repository for the project
   solutionLink: "Solution Link", // url — link to the finished solution
-} as const;
-
-export const SOLUTION_PROPS = {
-  title: "Name",
-  link: "Link", // url of the built/live solution
-  builtBy: "Built By", // rich text — builder credit
-  problems: "Problems", // relation → Problems database
-  date: "Date",
-  oneLiner: "One-Liner", // rich text — short one-sentence description on the gallery card
-  description: "Description", // rich text — full description shown in the modal
-  forumLink: "Forum Link", // url — forum thread for feedback
-  showcaseVideo: "Showcase Video", // url — YouTube showcase, embedded in the modal
 } as const;
 
 type Props = PageObjectResponse["properties"];
@@ -142,12 +129,6 @@ export function readSelect(props: Props, name: string): string {
 export function readUrl(props: Props, name: string): string {
   const prop = props[name];
   return prop?.type === "url" ? (prop.url ?? "") : "";
-}
-
-/** ISO date string (start) or "". */
-export function readDate(props: Props, name: string): string {
-  const prop = props[name];
-  return prop?.type === "date" ? (prop.date?.start ?? "") : "";
 }
 
 /**

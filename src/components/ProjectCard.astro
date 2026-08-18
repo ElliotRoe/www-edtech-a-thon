@@ -4,8 +4,7 @@ import { potentialSolutionAnchor } from "../lib/board";
 
 interface Props {
   solution: BoardSolution;
-  /** When set (a Completed project with a gallery entry), the button opens the
-   *  Solution Gallery modal for this key instead of following a link. */
+  /** Modal key for a Completed project with a gallery entry. */
   galleryKey?: string | null;
   /** Denser card for secondary sections that pack more per row (the
    *  Collaborative Build Cohort); the Project Board grid uses the full size. */
@@ -36,7 +35,7 @@ const SIZE = compact
       btnSize: "px-3 py-2 text-xs",
     };
 
-// Shared button styling for both the modal trigger and the plain link.
+// Shared action styling for both the progress-modal trigger and detail link.
 const btnClass = `mt-auto inline-flex cursor-pointer items-center justify-center gap-1 rounded-lg border border-primary-500 ${SIZE.btnSize} font-semibold text-slate-700 transition hover:border-primary-400 hover:bg-primary-50 hover:text-primary-900 group-hover:border-primary-400 group-hover:bg-primary-50 group-hover:text-primary-900`;
 
 // Style each card by its Progress. Full literal class strings so Tailwind's
@@ -68,36 +67,10 @@ const status =
 >
   <div class={`${SIZE.accent} w-full ${status.accent}`}></div>
   <div class={`flex h-full flex-col ${SIZE.body}`}>
-    <div class="flex items-start justify-between gap-2">
+    <div>
       <h3 class={`${SIZE.title} font-bold leading-snug text-slate-900`}>
         {solution.name}
       </h3>
-      {
-        solution.forumLink && (
-          <a
-            href={solution.forumLink}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label={`Open forum for ${solution.name}`}
-            class="shrink-0 rounded-md p-1 text-slate-400 transition hover:bg-primary-50 hover:text-primary-700"
-          >
-            <svg
-              viewBox="0 0 24 24"
-              class="h-5 w-5"
-              aria-hidden="true"
-            >
-              <path
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"
-              />
-            </svg>
-          </a>
-        )
-      }
     </div>
     {
       solution.oneLiner && (

@@ -482,6 +482,54 @@ const organizers = [
         ?.querySelector("[data-newsletter-status]");
     }
 
+    const turnstileWaitMs = 60_000;
+
+    function readTurnstileToken(form) {
+      const tokenInput = form.elements.namedItem("cf-turnstile-response");
+      return tokenInput instanceof HTMLInputElement ? tokenInput.value : "";
+    }
+
+    function waitForTurnstileToken(form) {
+      if (!form.querySelector("[data-newsletter-turnstile]")) {
+        return Promise.reject(
+          new Error("Newsletter signup is not configured."),
+        );
+      }
+
+      const existingToken = readTurnstileToken(form);
+      if (existingToken) return Promise.resolve(existingToken);
+
+      return new Promise((resolve, reject) => {
+        const deadline = Date.now() + turnstileWaitMs;
+
+        function checkForToken() {
+          const token = readTurnstileToken(form);
+          if (token) {
+            resolve(token);
+          } else if (Date.now() >= deadline) {
+            reject(new Error("Verification timed out. Please try again."));
+          } else {
+            window.requestAnimationFrame(checkForToken);
+          }
+        }
+
+        checkForToken();
+      });
+    }
+
+    function resetTurnstile(form) {
+      const widget = form.querySelector("[data-newsletter-turnstile]");
+      const turnstile = Reflect.get(window, "turnstile");
+
+      if (
+        widget instanceof HTMLElement &&
+        turnstile &&
+        typeof turnstile.reset === "function"
+      ) {
+        turnstile.reset(widget);
+      }
+    }
+
     function removeUrlParam(name) {
       const cleanUrl = new URL(window.location.href);
       if (!cleanUrl.searchParams.has(name)) return;
@@ -512,7 +560,7 @@ const organizers = [
           submitButton.textContent = "Signing Up…";
         }
         if (newsletterStatus instanceof HTMLElement) {
-          newsletterStatus.textContent = "Submitting your email…";
+          newsletterStatus.textContent = "Checking your browser…";
           newsletterStatus.classList.remove(
             "text-red-700",
             "text-primary-700",
@@ -520,12 +568,18 @@ const organizers = [
         }
 
         try {
+          const turnstileToken = await waitForTurnstileToken(form);
+          if (newsletterStatus instanceof HTMLElement) {
+            newsletterStatus.textContent = "Submitting your email…";
+          }
+
           const body = new URLSearchParams({
             email: emailInput.value,
             website:
               websiteInput instanceof HTMLInputElement
                 ? websiteInput.value
                 : "",
+            "cf-turnstile-response": turnstileToken,
           });
           const response = await fetch(form.action, {
             method: "POST",
@@ -555,6 +609,7 @@ const organizers = [
             newsletterStatus.classList.add("text-red-700");
           }
         } finally {
+          resetTurnstile(form);
           if (submitButton instanceof HTMLButtonElement) {
             submitButton.disabled = false;
             submitButton.textContent = "Sign Up for Our Newsletter";

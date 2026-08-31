@@ -47,7 +47,8 @@ const turnstileSiteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY?.trim();
           class="cf-turnstile w-full max-w-[300px]"
           data-sitekey={turnstileSiteKey}
           data-action="newsletter_signup"
-          data-appearance="interaction-only"
+          data-appearance="execute"
+          data-execution="execute"
           data-size="flexible"
           data-theme="light"
           data-newsletter-turnstile

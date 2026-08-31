@@ -490,7 +490,8 @@ const organizers = [
     }
 
     function waitForTurnstileToken(form) {
-      if (!form.querySelector("[data-newsletter-turnstile]")) {
+      const widget = form.querySelector("[data-newsletter-turnstile]");
+      if (!(widget instanceof HTMLElement)) {
         return Promise.reject(
           new Error("Newsletter signup is not configured."),
         );
@@ -501,6 +502,7 @@ const organizers = [
 
       return new Promise((resolve, reject) => {
         const deadline = Date.now() + turnstileWaitMs;
+        let challengeStarted = false;
 
         function checkForToken() {
           const token = readTurnstileToken(form);
@@ -509,6 +511,15 @@ const organizers = [
           } else if (Date.now() >= deadline) {
             reject(new Error("Verification timed out. Please try again."));
           } else {
+            const turnstile = Reflect.get(window, "turnstile");
+            if (
+              !challengeStarted &&
+              turnstile &&
+              typeof turnstile.execute === "function"
+            ) {
+              turnstile.execute(widget);
+              challengeStarted = true;
+            }
             window.requestAnimationFrame(checkForToken);
           }
         }
